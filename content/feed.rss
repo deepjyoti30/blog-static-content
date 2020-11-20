@@ -1,0 +1,1234 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0">
+  <channel>
+    <title>Blog | Deepjyoti Barman</title>
+    <link>https://blog.deepjyoti30.dev/feed</link>
+    <description>Just sharing my thoughts</description>
+    <atom:link href="https://blog.deepjyoti30.dev/feed" rel="self"/>
+    <docs>http://www.rssboard.org/rss-specification</docs>
+    <generator>python-feedgen</generator>
+    <image>
+      <url>https://blog.deepjyoti30.dev/img/logo.png</url>
+      <title>Blog | Deepjyoti Barman</title>
+      <link>https://blog.deepjyoti30.dev/feed</link>
+    </image>
+    <language>en</language>
+    <lastBuildDate>Tue, 17 Nov 2020 16:26:49 +0000</lastBuildDate>
+    <item>
+      <title>I created my own blog management system. Here's how I did it.</title>
+      <link>https://blog.deepjyoti30.dev/created-own-blog</link>
+      <description>&lt;p&gt;I have had a personal blog for a while now. I had written a few posts there but it was far from perfect. It was built using basic HTML, CSS and JS. I had seen all this awesome sites with unique designs and I thought, why not create my own?&lt;/p&gt;
+
+&lt;p&gt;I went with a front-end for back-end approach which means the back-end needed to be robust in order for the content to load properly and fast.&lt;/p&gt;
+
+&lt;p&gt;I built my API using FastAPI for Python and the webapp using VueJS.&lt;/p&gt;
+
+&lt;h1&gt;Building the API&lt;/h1&gt;
+
+&lt;h2&gt;Structering the API&lt;/h2&gt;
+
+&lt;p&gt;I laid down the endpoints that will possibly be needed in order for the blog to work properly.&lt;/p&gt;
+
+&lt;p&gt;Here are some of them&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;/posts: Allow GET, POST, UPDATE, DELETE where only GET will be public and other methods would need a secret token in order to access them&lt;/li&gt;
+&lt;li&gt;/subscribe: Allow POST, DELETE where only POST will be public.&lt;/li&gt;
+&lt;li&gt;/related: Allow GET to get the related posts to a post.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;For the database, I went with mongoDB. So the idea is to store the posts as markdown in the database and let the API access it. The frontend will then just make a request and get all the data from the API.&lt;/p&gt;
+
+&lt;h2&gt;Implementing the API&lt;/h2&gt;
+
+&lt;p&gt;It took me a few days to get the API ready. FastAPI was really helpful with their openapi docs to provide a nice interface in order to test the API without using &lt;code&gt;curl&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;The posts and the subscribe endpoint are pretty self explanatory, here's how I created the related endpoint.&lt;/p&gt;
+
+&lt;h2&gt;Finding posts related to a post&lt;/h2&gt;
+
+&lt;p&gt;Since all the posts will have tags linked to them, I used those to calculate a score for the post.&lt;/p&gt;
+
+&lt;p&gt;The &lt;code&gt;/related/&amp;lt;post_id&amp;gt;&lt;/code&gt; endpoint was structered to pass a &lt;code&gt;post_id&lt;/code&gt; that would tell us which post to consider the root post. Once we have this post, we can fetch all the other posts and calculate a related score.&lt;/p&gt;
+
+&lt;p&gt;This score is calculated in the following way&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Consider root_tags are tags of the source post&lt;/span&gt;
+&lt;span class="c1"&gt;# other_tags are the tags of the other post that.&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;calculate&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;root_tags&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;List&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;other_tags&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;List&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="c1"&gt;# Remove duplicate tags if present&lt;/span&gt;
+    &lt;span class="n"&gt;root_tags&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;set&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;root_tags&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;other_tags&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;set&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;other_tags&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="c1"&gt;# Calculate the score now&lt;/span&gt;
+    &lt;span class="n"&gt;score&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;root_tags&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;intersection&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;other_tags&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;root_tags&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;score&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Above code does the following:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Intersect the root tags with the other tags set giving us the common tags&lt;/li&gt;
+&lt;li&gt;Score is the division of the number of tags common between the two posts and the total number of tags present in the actual post.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;This way we get a score that would be between 0 and 1. Once we have this score, we can sort the posts based on the result and the posts that have a higher score are more related to a post as compared to other posts.&lt;/p&gt;
+
+&lt;h1&gt;Building the webapp&lt;/h1&gt;
+
+&lt;p&gt;The webapp is built using VueJS. The whole idea of the frontend for backend approach is, the frontend will be dependent on the backend for the data.&lt;/p&gt;
+
+&lt;h2&gt;Structuering the app&lt;/h2&gt;
+
+&lt;p&gt;Before building the app, I went through a few points that the app should be able to do&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;It should have a home page that will show the users all the posts available&lt;/li&gt;
+&lt;li&gt;It should be able to show each post&lt;/li&gt;
+&lt;li&gt;It should be fast&lt;/li&gt;
+&lt;li&gt;It should be able to load posts directly through a route (for example: &lt;code&gt;blog.com/nana&lt;/code&gt; should load the post &lt;code&gt;nana&lt;/code&gt; and not just the webapp that is hosted on &lt;code&gt;blog.com&lt;/code&gt;)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The first part is pretty simple. I just used the &lt;code&gt;/posts&lt;/code&gt; route in order to get all the posts and then displayed them in a nice way.&lt;/p&gt;
+
+&lt;h2&gt;Rendering the post dynamically&lt;/h2&gt;
+
+&lt;p&gt;Here's the flow of how a post is rendered&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;If the user clicks on a post from the home page, the content of the post is passed to the router and accordingly rendered in the post view.&lt;/li&gt;
+&lt;li&gt;If the post is opened using a route, the route is used to find the post and accordingly the content is shown.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The above basically does two things:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Makes the load speed faster if the user opens a post from the home page&lt;/li&gt;
+&lt;li&gt;Adds the ability to load a post using the route.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;To pass the contents of the post by the route, use a route prop to pass a object that will hold the contents. In the Post view, check if this object is available or not, if not use the route to make a request and fetch the content.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2&gt;What about SEO?&lt;/h2&gt;
+
+&lt;p&gt;Well yeah, I know SEO is important. For loading the meta tags I used &lt;a href="https://github.com/ktquez/vue-head"&gt;vue-head&lt;/a&gt; which renders the meta tags dynamically after the post is loaded using the API.&lt;/p&gt;
+
+&lt;p&gt;This is pretty important since the meta tags are used by all the bots crawling the page. Also, Google bots are now able to crawl dynamically rendered content whcih means it should not be an issue if the tags are loaded dynamically using JS.&lt;/p&gt;
+
+&lt;h1&gt;Problems&lt;/h1&gt;
+
+&lt;p&gt;Except the common occurence of bugs, I did not had any problems with the back end. However there was one issue that made me question the whole idea. How do bots that do not have the ability to crawl dynamically rendered content crawl the page.&lt;/p&gt;
+
+&lt;p&gt;For example, twitter bots crawl a page in order to show a nice card view. If the bots are not able to crawl the page then the card won't be there. Not just Twitter, a similar functionality is used by various other social share bots like the ones from Facebook and LinkedIn.&lt;/p&gt;
+
+&lt;h2&gt;How to let bots crawl the page&lt;/h2&gt;
+
+&lt;p&gt;Well, so how did I fix this issue? At first, I obviously thought this would be inevitable because there's no way the bots would be able to detect dynamically rendered content. One solution was to go with server side rendering but I'm better off not diving down that road.&lt;/p&gt;
+
+&lt;p&gt;So the solution that I went with was to write a static file server in Python.&lt;/p&gt;
+
+&lt;p&gt;What would our server do?&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;It should be able to return the static html, JS, CSS files.&lt;/li&gt;
+&lt;li&gt;It should be able to return a rendered HTML with just the meta tags if the request is made by a bot.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I built the server using Flask for Python. It detects the request making entity using the &lt;code&gt;User-Agent&lt;/code&gt; header being passed and accordingly returns an HTML. If the request is being made by a bot, it returns some HTML content that has the meta representing the post.&lt;/p&gt;
+
+&lt;p&gt;Else it returns the proper static files.&lt;/p&gt;
+
+&lt;p&gt;You can read about it &lt;a href="https://blog.deepjyoti30.dev/let-bots-crawl-dynamic-page"&gt;here&lt;/a&gt;&lt;/p&gt;
+</description>
+      <guid isPermaLink="false">https://blog.deepjyoti30.dev/created-own-blog</guid>
+      <category>webdev</category>
+      <category>javascript</category>
+      <category>python</category>
+      <category>css</category>
+      <pubDate>Tue, 17 Nov 2020 16:22:55 +0000</pubDate>
+    </item>
+    <item>
+      <title>Letting bots crawl your dynamically rendered page</title>
+      <link>https://blog.deepjyoti30.dev/let-bots-crawl-dynamic-page</link>
+      <description>&lt;p&gt;Meta tags are one of the most important aspects of a blog. In the recent years, crawlers such as from Google and Bing etc have advanced a lot, they are able to crawl pages that render content dynamically.&lt;/p&gt;
+
+&lt;p&gt;One important role meta plays is to give the page an identity to all the crawlers from social share sites like Twitter etc. These crawlers are not yet that advanced as to recognize dynamically rendered content.&lt;/p&gt;
+
+&lt;h2&gt;How do they work?&lt;/h2&gt;
+
+&lt;p&gt;Whenever you share a post on Twitter, Facebook etc, you'll see a nice little card showing you the title of the post, some description and the cover image (possibly). Ever wondered how they are able to show that? Yep, they use the meta tags from the posts URL.&lt;/p&gt;
+
+&lt;h2&gt;Techincally, how do they work?&lt;/h2&gt;
+
+&lt;p&gt;All right, let's get a bit technical here, how does it actually get all that data?&lt;/p&gt;
+
+&lt;p&gt;Well, when you share an URL, the crawlers basically send a &lt;strong&gt;GET&lt;/strong&gt; request to that URL and the server sends back the HTML content of the page. Once the page is received, the crawlers extract all the content from it and accordingly you see those data on your Twitter feed.&lt;/p&gt;
+
+&lt;h2&gt;What is dynamic rendering of content&lt;/h2&gt;
+
+&lt;p&gt;Okay, so what is this dynamic rendering I'm talking about? In order to understand how dynamic rendering works, you need to know how the static pages work.&lt;/p&gt;
+
+&lt;h3&gt;What are static pages?&lt;/h3&gt;
+
+&lt;p&gt;So, we call some pages static because, well, they are &lt;strong&gt;static&lt;/strong&gt;. They are just HTML pages that were created by someone and when you try to open them, your browser fetches the HTMl content from that someone's server and shows it to you.&lt;/p&gt;
+
+&lt;p&gt;Now here's the deal, if you want to create a personal blog, can you imagine how tedious it will become to manually keep creating HTML pages for each blog post you write? Well, perhaps you can't but believe me when I say, it becomes a mess real quick.&lt;/p&gt;
+
+&lt;h3&gt;What is dynamic rendering?&lt;/h3&gt;
+
+&lt;p&gt;Well since static pages become a mess, for something like a personal blog, dynamic rendering is very useful. You just store all the blogs etc in the backend and you just have one HTML page (not literally). This page will render the content based on the post that the user wants to read.&lt;/p&gt;
+
+&lt;p&gt;This takes away a lot of the issue of static pages. Like, whenever you feel like creating a new post, just add it to your backend and your frontend will take care of it automatically.&lt;/p&gt;
+
+&lt;p&gt;This is how &lt;strong&gt;this&lt;/strong&gt; blog is also handled (I recently made the move to this new blog page, if you had checked my site before, you'd be aware of the old static page).&lt;/p&gt;
+
+&lt;h2&gt;The problem&lt;/h2&gt;
+
+&lt;p&gt;It's no secret that dynamic rendering is pretty useful. However it brings its own issues. One issue is since the content is rendered dynamically, it means the meta tags are also rendered dynamically.&lt;/p&gt;
+
+&lt;p&gt;But, as I mentioned in the beginning, bots like Twitter do not support that yet. So the problem is how do you make your posts crawlable by bots so that whenever you share it somewhere it shows up real nice and good?&lt;/p&gt;
+
+&lt;h2&gt;The solution&lt;/h2&gt;
+
+&lt;p&gt;After I faced this issue, I started wondering what could be a nice possible solution for this.&lt;/p&gt;
+
+&lt;p&gt;I came across a &lt;a href="https://dev.to/burhanahmeed/dynamic-rendering-simple-solution-for-spa-when-shared-on-social-media-amd"&gt;post on dev.to&lt;/a&gt; that basically said that in order to let bots crawl, we need to use a middleware in our server.&lt;/p&gt;
+
+&lt;p&gt;The above post is basically about creating a static file server in expresss that serves the files from the &lt;code&gt;dist&lt;/code&gt; directory. However, when the request is made by some bot, it loads the page using &lt;a href="https://github.com/puppeteer/puppeteer"&gt;puppeteer&lt;/a&gt; which is basically the selenium equivalent of nodeJS. What is does is using a chromedriver in order to load the page and then returns the content.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;The check to see if it is a bot is done by checking the User-Agent header which tells us who is making the request.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Once the content is recieved from puppeteer, it is returned to the bot that is trying to crawl the page.&lt;/p&gt;
+
+&lt;p&gt;Our solution will be somewhat similar to the above, but in Python. Yep, Python it is.&lt;/p&gt;
+
+&lt;h2&gt;My solution&lt;/h2&gt;
+
+&lt;p&gt;My idea was simple. I need to have a middleware that will do the following&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Check if the request is being made by some bot&lt;/li&gt;
+&lt;li&gt;If it is, get a skeleton HTML page from my backend that is rendered dynamically and it adds all the necessary meta tags&lt;/li&gt;
+&lt;li&gt;Else, return proper index.html&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;I made a basic static file server using Flask that does exactly the above. It checks if the user agent is a bot by using the &lt;a href="https://pypi.org/project/user-agents/"&gt;user-agents&lt;/a&gt; library and accordingly returns the content.&lt;/p&gt;
+
+&lt;h3&gt;Implementation&lt;/h3&gt;
+
+&lt;p&gt;I'm not going to dive deep into the second point. What I did in there was to add an endpoint in my API that returns a dynamically rendered HTML that contains all the necessary meta tags.&lt;/p&gt;
+
+&lt;p&gt;Checking the user agent is done in the following code. We will use the &lt;code&gt;user-agents&lt;/code&gt; library to determine if the request is being made by some bot.&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Considering you have registered a flask app&lt;/span&gt;
+
+&lt;span class="nd"&gt;@app&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;route&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;/&amp;lt;slug&amp;gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;return_post&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;slug&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="c1"&gt;# If the user agent is a bot, return just meta&lt;/span&gt;
+    &lt;span class="n"&gt;user_agent&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;parse&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;request&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;user_agent&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;string&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="c1"&gt;# Check if it is not bot&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="ow"&gt;not&lt;/span&gt; &lt;span class="n"&gt;user_agent&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;is_bot&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;app&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;{}&lt;/span&gt;&lt;span class="s2"&gt;: Returning content for not bot&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;request&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;full_path&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;send_file&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;index.html&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;In the above code chunk, flask is checking the route &lt;code&gt;/&amp;lt;slug&amp;gt;&lt;/code&gt;. Slug is a string. Since all the posts in my page are in the form of &lt;code&gt;blog.deepjyoti30.dev/&amp;lt;slug&amp;gt;&lt;/code&gt;, it's only necessary to check those posts.&lt;/p&gt;
+
+&lt;p&gt;After that slug is matched, we are parsing the &lt;code&gt;User-Agent&lt;/code&gt; string and checking if it is not a bot. If so, we are returning the &lt;code&gt;index.html&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;So we are now set to serve the files to a normal user, what should we do regarding the bots?&lt;/p&gt;
+
+&lt;p&gt;The following code chunk shows what to do if it is a bot.&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="c1"&gt;# Get proper meta and return&lt;/span&gt;
+    &lt;span class="n"&gt;content&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;get_rendered_html&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;slug&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;app&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;{}&lt;/span&gt;&lt;span class="s2"&gt;: Returning content for bot.&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;request&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;full_path&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;content&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The above code is pretty self explanatory. If the one making the request is a bot then we get the rendered html using the slug and accordingly return that.&lt;/p&gt;
+
+&lt;p&gt;This way the social share bots will be able to go through the content and accordingly show the image cover etc.&lt;/p&gt;
+
+&lt;p&gt;Now, the above code becomes the following&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Considering you have registered a flask app&lt;/span&gt;
+&lt;span class="c1"&gt;# Check the flask docs to know how to do that&lt;/span&gt;
+
+&lt;span class="nd"&gt;@app&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;route&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;/&amp;lt;slug&amp;gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;return_post&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;slug&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="c1"&gt;# If the user agent is a bot, return just meta&lt;/span&gt;
+    &lt;span class="n"&gt;user_agent&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;parse&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;request&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;user_agent&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;string&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="c1"&gt;# Check if it is not bot&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="ow"&gt;not&lt;/span&gt; &lt;span class="n"&gt;user_agent&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;is_bot&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;app&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;{}&lt;/span&gt;&lt;span class="s2"&gt;: Returning content for not bot&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;request&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;full_path&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;send_file&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;index.html&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="c1"&gt;# Get proper meta and return&lt;/span&gt;
+    &lt;span class="n"&gt;content&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;get_rendered_html&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;slug&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;app&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;{}&lt;/span&gt;&lt;span class="s2"&gt;: Returning content for bot.&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;request&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;full_path&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;content&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The above is code for serving the basic index.html. You will need to specifically serve other files as well such as js, css etc. One way of doing those is by the following:&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Serve the img directory&lt;/span&gt;
+&lt;span class="nd"&gt;@app&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;route&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;/img/&amp;lt;path:file&amp;gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;send_img&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;file&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="n"&gt;app&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;{}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;request&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;full_path&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;send_from_directory&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Path&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;dist&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;joinpath&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;img&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="n"&gt;file&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;You will have to do something like above for other directories as well, like the js directory as well as teh css directory and other files.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For production, use a WSGI http server like &lt;a href="https://gunicorn.org/"&gt;gunicorn&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;Dynamic rendering is fun and really usefull, however it has it's own caveats. All in all, it is still worth it since the issues are not that big a deal. You can try out the above code in action in the following way.&lt;/p&gt;
+
+&lt;p&gt;Let's take this post as an example: &lt;code&gt;https://blog.deepjyoti30.dev/using-mongo-with-heroku&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Make a GET request using a proper User-Agent in the following way.&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="go"&gt;curl https://blog.deepjyoti30.dev/using-mongo-with-heroku \&lt;/span&gt;
+&lt;span class="go"&gt;    -H &amp;quot;User-Agent: Mozilla/5.0 (Linux; Android 4.0.4; Galaxy Nexus Build/IMM76B) AppleWebKit53519&amp;quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;If you have a proper internet connection, you'll see some minimal JS related code. This means the request was recognized as being from a user and not a bot.&lt;/p&gt;
+
+&lt;p&gt;Let's now try to imitate a bot in the following way:&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="go"&gt;curl https://blog.deepjyoti30.dev/using-mongo-with-heroku \&lt;/span&gt;
+&lt;span class="go"&gt;    -H &amp;quot;User-Agent: just-a-bot&amp;quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;You should now get some HTML content. This clearly shows the request was recognized as being from a bot and thus some HTML content was returned with proper metadata.&lt;/p&gt;
+</description>
+      <guid isPermaLink="false">https://blog.deepjyoti30.dev/let-bots-crawl-dynamic-page</guid>
+      <category>meta</category>
+      <category>dynamic</category>
+      <category>rendered</category>
+      <category>page</category>
+      <pubDate>Fri, 13 Nov 2020 12:17:45 +0000</pubDate>
+    </item>
+    <item>
+      <title>Getting started with using MongoDB with free Heroku account</title>
+      <link>https://blog.deepjyoti30.dev/using-mongo-with-heroku</link>
+      <description>&lt;p&gt;I have been running away from using a proper Database for my personal page for a while. I thought it would be a lot of hassle considering that my backend is present on Heroku and the frontend is hosted using Github Pages, I was wrong.&lt;/p&gt;
+
+&lt;p&gt;I recently was working on a project with some of my friends, it was for a Hackathon I participated in. In that, I came through a problem of using a database in order to store the data of the users. I initially did not put much thought on it, however people suggested that I use a graph database for that problem, it would blend in perfectly for my situation.&lt;/p&gt;
+
+&lt;p&gt;I put some thought on it and researched a bit. I ended up using neo4j as my backends graphDB. Surprisingly, the process to use it was really simple and as usual I used it with Heroku (I might write about that later in a different post).&lt;/p&gt;
+
+&lt;p&gt;So now I thought, why not use a database for my personal page as well. I had time and I thought it would be better if I would do that since I'm also thinking about moving away from github pages and buying my own domain (not sure).&lt;/p&gt;
+
+&lt;p&gt;So that's that, I finally made the move to a DB. As of today, all the endpoints are working with the newly implemented logic to work with the database. As usual I thought why not write a blog about it.&lt;/p&gt;
+
+&lt;h2&gt;How it works&lt;/h2&gt;
+
+&lt;p&gt;In order to host a database, Heroku uses MongoDB's &lt;a href="https://mlab.com/"&gt;mLab&lt;/a&gt;. It is actually a cloud service provided by MongoDB themselves that allows users to create databases in the cloud and users can connect to them using the URL provided by them.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;We will have our backend code hosted on Heroku and our database hosted on some server handled by mLab.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Usually if a person wants to use a database on their &lt;em&gt;own&lt;/em&gt; server, than the server can be installed locally and then run on a port and the code that will interact with the server will connect to this local port.This is almost similar to using our own server with the difference that the database will be handled by mLab.&lt;/p&gt;
+
+&lt;p&gt;So to conclude, we will have our backend code hosted on Heroku and our database hosted on some server handled by mLab. Our code present on Heroku will interact with the database present in mLab's servers through their URL and write or read documents.&lt;/p&gt;
+
+&lt;h2&gt;Getting Started&lt;/h2&gt;
+
+&lt;p&gt;First things first, make sure you have a app created on Heroku where all the backend code will go. Once that's ready we can run one command to install the add on on to the app.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;heroku addons:create mongolab&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Alternately it can also be added through the &lt;a href="https://elements.heroku.com/addons/mongolab"&gt;add-on catalog&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;After the app is added, get the URL that will be used to connect to the mongoDB database. It can be get by the following command.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;heroku config:get MONGODB_URI&lt;/code&gt;  &lt;/p&gt;
+
+&lt;p&gt;What happens is, once the app is added, Heroku creates a new database for you and the URL to connect to that database is added as a environmet variable that can be fetched by the above command.&lt;/p&gt;
+
+&lt;p&gt;Once this is done, you can go to &lt;strong&gt;mLab&lt;/strong&gt; and created databases, collections, users etc everything right from there.&lt;/p&gt;
+
+&lt;p&gt;Now that we have the database set up, how do we talk with the database in order to store our data. So that can be done by various. You can install &lt;strong&gt;mongodb-shell&lt;/strong&gt; in order to be able to connect to the database from your local terminal.&lt;/p&gt;
+
+&lt;p&gt;The preferred way to interact is obviously a language. I like to use Python, however MongoDB has drivers for a lot of languages and a lot of documentation is also available for each one of them.&lt;/p&gt;
+
+&lt;p&gt;For Python the module is &lt;strong&gt;pymongo&lt;/strong&gt; that is available in &lt;a href="https://pypi.org/project/pymongo/"&gt;PyPi&lt;/a&gt; and is pretty straightforward to use. I used this module for all the stuff I'm doing in order to connect to the remote database.&lt;/p&gt;
+
+&lt;h2&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;Thats it people, it's that simple to setup and use mongoDB from Heroku and I was seriously blown away by how simple it is.&lt;/p&gt;
+
+&lt;p&gt;However, while storing data take precautions. Try to follow best practices in order to keep your database secure. As I read in one Stackoverflow answer, if we make a different user that has access to just one collection (tables are collections in MongoDB), even it's better than not having any security and just using the root user to connect.&lt;/p&gt;
+
+&lt;p&gt;Also try to refer to the official docs as the methods, classes keep changing with updates. I myself faced an issue because I was trying to connect' and write to the database in a method that was depreciated, so try to always read the docs and follow those rather than following some random article.&lt;/p&gt;
+</description>
+      <guid isPermaLink="false">https://blog.deepjyoti30.dev/using-mongo-with-heroku</guid>
+      <category>heroku</category>
+      <category>database</category>
+      <category>mongodb</category>
+      <category>mlab</category>
+      <pubDate>Mon, 11 May 2020 00:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>Using Spotify with ncmpcpp and Mopidy in Linux</title>
+      <link>https://blog.deepjyoti30.dev/using-spotify-with-ncmpcpp-mopidy-linux</link>
+      <description>&lt;p&gt;Back when I started using Linux, I really built a liking for ncmpcpp. However, that was when I mostly used to listen to songs that are stored locally on my machine. After a few months, I started using Spotify and so I had to stop using ncmpcpp because I did not have a Spotify Premium account to use with ncmpcpp.&lt;/p&gt;
+
+&lt;p&gt;I have a Premium account now and I was restlessly looking for a CLI based Spotify client when I found a comment mentioning &lt;strong&gt;ncmpcpp with mopidy-spotify&lt;/strong&gt; and my memory hit back at once. We can use ncmpcpp with Spotify, here's how to do it properly.&lt;/p&gt;
+
+&lt;h2&gt;Requirements&lt;/h2&gt;
+
+&lt;p&gt;We will need to install a few apps in order to use Spotify.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://github.com/ncmpcpp/ncmpcpp"&gt;ncmpcpp&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://github.com/mopidy/mopidy"&gt;mopidy&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://github.com/mopidy/mopidy-spotify"&gt;mopidy-spotify&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The above apps can be found in the respective app stores. In my case I used AUR and PyPI to get them. Check installation instructions in the GitHub pages.&lt;/p&gt;
+
+&lt;h3&gt;ncmpcpp&lt;/h3&gt;
+
+&lt;p&gt;ncmpcpp is a frontend for MPD (Music Player Daemon) and it's a fork of ncmpc but it's better in many ways than ncmpc and offers a lot of extra features.&lt;/p&gt;
+
+&lt;h3&gt;mopidy&lt;/h3&gt;
+
+&lt;p&gt;Mopidy is an extensible music server which is written in Python but the good thing is it also supports MPD clients, thus we can use it with ncmpcpp&lt;/p&gt;
+
+&lt;h3&gt;mopidy-spotify&lt;/h3&gt;
+
+&lt;p&gt;mopidy-spotify is just an extension of mopidy which lets us use Spotify with Mopidy given we have a Premium Spotify account. A Premium account is required because Spotify puts restrictions in their API for free accounts. Thus free accounts cannot get proper access of all the Spotify endpoints.&lt;/p&gt;
+
+&lt;h2&gt;Getting Started&lt;/h2&gt;
+
+&lt;p&gt;We need to use all the above apps so install them before going along with this article.&lt;/p&gt;
+
+&lt;p&gt;Here's how we will get it to work. We will use Mopidy along with Mopidy Spotify to get our Spotify data and play songs etc. So we have our backend ready. Once that's done, we will configure ncmpcpp to work with mopidy in order to make our frontend work as well. So we have our frontend ready as well.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/process_spotify_cli.jpg" alt="How Spotify CLI works with Mopidy" /&gt;&lt;/p&gt;
+
+&lt;p&gt;The above image sums it up nicely. How the whole thing is going to work.&lt;/p&gt;
+
+&lt;p&gt;Once the installation is done, we will have to configure ncmpcpp, and mopidy. Each one of them has a config file that will be used while the app runs. This config files are important in order to make sure everthing works. Please follow the steps properly.&lt;/p&gt;
+
+&lt;h2&gt;Setting up Mopidy&lt;/h2&gt;
+
+&lt;p&gt;The mopidy config is stored in the &lt;strong&gt;~/.config/mopidy&lt;/strong&gt; directory. The name of the config is &lt;strong&gt;mopidy.conf&lt;/strong&gt;. Here's the mopidy.conf&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;core&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;span class="n"&gt;restore_state&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;true&lt;/span&gt;
+
+&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;mpd&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;span class="n"&gt;enabled&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;true&lt;/span&gt;
+&lt;span class="n"&gt;hostname&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mf"&gt;127.0&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="mf"&gt;0.1&lt;/span&gt;
+&lt;span class="n"&gt;port&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;6600&lt;/span&gt;
+
+&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;spotify&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;span class="n"&gt;enabled&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;true&lt;/span&gt;
+&lt;span class="n"&gt;username&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;your_username&lt;/span&gt;
+&lt;span class="n"&gt;password&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;your_pw&lt;/span&gt;
+&lt;span class="n"&gt;client_id&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;your_client_id&lt;/span&gt;
+&lt;span class="n"&gt;client_secret&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;your_client_secret&lt;/span&gt;
+&lt;span class="n"&gt;bitrate&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;320&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The client_id and secret can be fetched from &lt;a href="https://mopidy.com/ext/spotify/"&gt;here&lt;/a&gt;. Put the values you get in the config file above.&lt;/p&gt;
+
+&lt;p&gt;Put your Spotify &lt;strong&gt;username&lt;/strong&gt; and &lt;strong&gt;password&lt;/strong&gt; above as well.&lt;/p&gt;
+
+&lt;p&gt;The MPD section takes the values &lt;strong&gt;hostname&lt;/strong&gt; and &lt;strong&gt;port&lt;/strong&gt;. The default value of hostname is &lt;strong&gt;127.0.0.1&lt;/strong&gt; and port is &lt;strong&gt;6600&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Note that we need to keep the hostname and port same through all the files in order for them to work together. It's simple how they'll work. Mopidy will serve the data in the hostname and port we specify and ncmpcpp will read the data from them, thus we need to keep em same throughout all the config files.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;enabled&lt;/strong&gt; option tells mopidy if the current extension is enabled or not. The default values are &lt;strong&gt;false&lt;/strong&gt;. So we need to change them in order to tell mopidy that we want to use mopidy-spotify.&lt;/p&gt;
+
+&lt;h2&gt;Setting up ncmpcpp&lt;/h2&gt;
+
+&lt;p&gt;The ncmpcpp config is stored in the &lt;strong&gt;~/.config/ncmpcpp&lt;/strong&gt; directory. The name of the file &lt;strong&gt;config&lt;/strong&gt;. Only three values would suffice to get it up and running.&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;mpd_host&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;127.0.0.1&amp;quot;&lt;/span&gt;
+&lt;span class="n"&gt;mpd_port&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;6600&lt;/span&gt;
+&lt;span class="n"&gt;mpd_music_dir&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="o"&gt;~/&lt;/span&gt;&lt;span class="n"&gt;Music&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;As I mentioned earlier, the host and port need to be the same in this config as well. The &lt;strong&gt;mpd_music_dir&lt;/strong&gt; is required by ncmpcpp.&lt;/p&gt;
+
+&lt;p&gt;A sample configuration file is provided by ncmpcpp. It can be copied from &lt;strong&gt;/usr/share/doc/ncmpcpp/config&lt;/strong&gt; to the config directory. This file would have a proper explanation of all the possible values along with other information. Check the &lt;a href="https://wiki.archlinux.org/index.php/Ncmpcpp"&gt;wiki&lt;/a&gt; for more details.&lt;/p&gt;
+
+&lt;h2&gt;Using ncmpcpp&lt;/h2&gt;
+
+&lt;p&gt;Once the above configurations are done, we are good to start using Spotify from the CLI. Just run &lt;strong&gt;mopidy&lt;/strong&gt; in order to start the daemon/backend.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/ncmpcpp_playlist.jpg" alt="ncmpcpp playlist window" /&gt;&lt;/p&gt;
+
+&lt;p&gt;Once mopidy is running, open ncmpcpp in another window or push mopidy to background and open in the same window. You might see an empty window, this would probably because ncmpcpp loads up by default the now playing screen and since we haven't played anything yet, it would be empty.&lt;/p&gt;
+
+&lt;p&gt;Click the number &lt;strong&gt;2&lt;/strong&gt; and you'll see all your playlists, play some playlists and you should be good to go. Check the &lt;a href="https://pkgbuild.com/~jelle/ncmpcpp/"&gt;cheatsheet&lt;/a&gt; for more.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;I've using this setup for about a week now and so far I haven't faced any issues. Feel free to DM me with your querries.&lt;/em&gt;&lt;/p&gt;
+</description>
+      <guid isPermaLink="false">https://blog.deepjyoti30.dev/using-spotify-with-ncmpcpp-mopidy-linux</guid>
+      <category>linux</category>
+      <category>commandline</category>
+      <category>spotify</category>
+      <category>cli</category>
+      <pubDate>Thu, 16 Apr 2020 00:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>Getting started with web scraping in Python</title>
+      <link>https://blog.deepjyoti30.dev/getting-started-with-web-scraping-in-python</link>
+      <description>&lt;p&gt;Every now and then a developer comes up with an idea, an app that would yield awesome results. The idea sounds pretty good, the plan theoretically sounds foolproof, however the developer gets stuck while developing the app because it's supposed to be dependent on another app, a famous app and the developer thought they would use the famous apps API. It seems the famous app doesn't have an API and if it has one, it allows limited access. The idea is dead.&lt;/p&gt;
+
+&lt;h2&gt;Web scraping&lt;/h2&gt;
+
+&lt;p&gt;If you do a simple Google search about Web Scraping, it'll lead you to the wiki page of Web Scraping, which notes that web scraping started way back in 1993. Even though back then, and even now, these scrapers were used to collect data from the sites, our aim would be a bit different. We don't want to collect all kinds of data but only the data that would benefit us.&lt;/p&gt;
+
+&lt;p&gt;I am not going to talk about the advantages of scraping the web or anything and neither am I encouraging anyone to scrap the web like anything. This will be just a simple tutorial focused on beginners who have just taken their baby steps in the world of Python and want to do something great. That doesn't mean this can't be referred by experienced people, just that they'll end up judging me as to why I am spoon feeding everything to the beginners.&lt;/p&gt;
+
+&lt;p&gt;For the sake of this article, we'll take the example of building a simple API for billboard that returns chart data based on the passed chart name.&lt;/p&gt;
+
+&lt;h2&gt;The Process&lt;/h2&gt;
+
+&lt;p&gt;The process can be broken down into 3 steps&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Research&lt;/li&gt;
+&lt;li&gt;Implementing&lt;/li&gt;
+&lt;li&gt;Checking all cases&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2&gt;Research&lt;/h2&gt;
+
+&lt;p&gt;Research can be considered the most important part. For the kind of scraper we are writing, it's really important to check the sources of the page and properly find div's that can be filtered out using their class names or id names.&lt;/p&gt;
+
+&lt;p&gt;It is assumed that basic knowledge of HTML is present in the reader. Most pages use div's to create sections except some pages like YouTube that use their own elements in HTML. However, once the understanding of elements is present, it becomes pretty straightforward.&lt;/p&gt;
+
+&lt;p&gt;So just fire up the URL you want to scrap on your preferred browser. I use Chrome for doing that but Firefox and Safari should behave similarly. Once the page is opened, open the developer tools by either the three dot menu on top right or by the Ctrl+Shift+I&lt;/p&gt;
+
+&lt;p&gt;Once the developer tools is open, go to the elements tab and start looking at the source code. It won't make much sense and by default all the outermost elements will be visible.&lt;/p&gt;
+
+&lt;p&gt;So browsers have this neat feature that if we hover the cursor on top of some element, the element lights up in the page.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/cursor_hover_effect.jpg" alt="Cursor hover effect chrome" /&gt; Element lights up on mouse hover&lt;/p&gt;
+
+&lt;p&gt;Once you figure out how to use this feature, dive into the code. Go to the part of the page, the data that you want from the page. After that start hovering on elements and get to the inner most element that actually contains the data.&lt;/p&gt;
+
+&lt;p&gt;Let's see which element contains the chart name.&lt;/p&gt;
+
+&lt;p&gt;So probably the element containing the chart name is somewhere inside the main element. Click on it and open it. Go through all the elements untill you find the element that's containing the chart name exactly. This is the element we are going to use to extract the name of the chart.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/chart_name.jpg" alt="Chart Name element" /&gt;&lt;/p&gt;
+
+&lt;p&gt;Now that we have the element containing the name of the chart, let's try to see if the class name of this element is unique.&lt;/p&gt;
+
+&lt;h2&gt;Implementing&lt;/h2&gt;
+
+&lt;p&gt;We will use 3 tools to implement the scraper. There are a plethora of tools available to scrap webpages. Some tools are better than others and some are simpler than others. I like to go with the simple ones and so stick to these tools for eveything.&lt;/p&gt;
+
+&lt;p&gt;The tools I use are&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;a href="https://requests.readthedocs.io/en/master/"&gt;requests&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://pypi.org/project/beautifulsoup4/"&gt;beautifulsoup4&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.python.org/3/library/re.html"&gt;regex&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;We will need requests to get the page data. beautifulsoup4 or bs4 for formatting the data into something meaningful and regex or re to find out particular things from the data.&lt;/p&gt;
+
+&lt;p&gt;Once we have the tools installed, for all testing purposes rather than writing the script, open the python interpreter on Terminal by typing python. Once you are in Python, import all the modules.&lt;/p&gt;
+
+&lt;p&gt;After we have the modules, we will requests to make a get request and get the data and then pass the data ot BeautifulSoup to parse it. The process of extracting the exact data varies. I can't explain each and every step right now, take a look at the code below.&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;requests&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;get&lt;/span&gt;  &lt;span class="c1"&gt;# To get the page data&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;bs4&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;BeautifulSoup&lt;/span&gt;  &lt;span class="c1"&gt;# To parse the data&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;re&lt;/span&gt;   &lt;span class="c1"&gt;# To extract certain things&lt;/span&gt;
+
+&lt;span class="n"&gt;url&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;https://www.billboard.com/charts/pop-songs&amp;quot;&lt;/span&gt;
+
+&lt;span class="c1"&gt;# Get the page data&lt;/span&gt;
+&lt;span class="n"&gt;response&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;url&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="c1"&gt;# Response is just an instance and the actual data&lt;/span&gt;
+&lt;span class="c1"&gt;# is present in response.text or response.content&lt;/span&gt;
+&lt;span class="n"&gt;data&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;text&lt;/span&gt;
+
+&lt;span class="c1"&gt;# Now pass the data to BeautifulSoup for it to parse it&lt;/span&gt;
+&lt;span class="n"&gt;soup&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;BeautifulSoup&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;html.parser&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="c1"&gt;# The chart name is present in an h1 tag&lt;/span&gt;
+&lt;span class="c1"&gt;# with the class chart-detail-header__chart-name&lt;/span&gt;
+&lt;span class="c1"&gt;# We can use the findAll method of bs4 to find all the occurences&lt;/span&gt;
+&lt;span class="c1"&gt;# of this class&lt;/span&gt;
+&lt;span class="n"&gt;temp_name&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;soup&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;findAll&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+                &lt;span class="s2"&gt;&amp;quot;h1&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="n"&gt;attrs&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;class&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;chart-detail-header__chart-name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;})&lt;/span&gt;
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;{}&lt;/span&gt;&lt;span class="s2"&gt; found&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;temp_name&lt;/span&gt;&lt;span class="p"&gt;)))&lt;/span&gt;
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;temp_name&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Above script, when run outputs the following result.&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# ------OUTPUT---------&lt;/span&gt;
+&lt;span class="c1"&gt;# 1 found&lt;/span&gt;
+&lt;span class="c1"&gt;# [&amp;lt;h1 class=&amp;quot;chart-detail-header__chart-name&amp;quot;&amp;gt;&lt;/span&gt;
+&lt;span class="c1"&gt;# POP SONGS&lt;/span&gt;
+&lt;span class="c1"&gt;# &amp;lt;/h1&amp;gt;]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;If we look closely, the output is a list with just one match which contains the h1 div we checked and it has the name of the chart inside the element.&lt;/p&gt;
+
+&lt;p&gt;Now, the problem we have is we need to extract the name from inside the element. How to do that? Yup, we will use regex to get the name.&lt;/p&gt;
+
+&lt;p&gt;First things first, if you check the output properly, you'll notice that after the 1 found line, there are 3 lines, which means there are &lt;code&gt;\n&lt;/code&gt; in between them. Even if there won't be any, it's always good to try remove them.&lt;/p&gt;
+
+&lt;p&gt;re has all kinds of functions for this. We can use the &lt;code&gt;sub()&lt;/code&gt; method for that.&lt;/p&gt;
+
+&lt;p&gt;If we look at the &lt;code&gt;temp_name&lt;/code&gt; variable closely, we'll see that the name of the chart is present between &lt;code&gt;&amp;gt;&lt;/code&gt; and &lt;code&gt;(less than) /&lt;/code&gt; tags.&lt;/p&gt;
+
+&lt;p&gt;NOTE: I used less than above because HTML doesn't allow writing that tag without screwing up something.&lt;/p&gt;
+
+&lt;p&gt;So now, we can use a regex method to filter out anything that's between those two characters. &lt;br /&gt;
+&lt;code&gt;re.findall(r'img alt=".*?"', str(temp_name))&lt;/code&gt; &lt;br /&gt;
+This will return a list containing all the matches of the above pattern.&lt;/p&gt;
+
+&lt;p&gt;After we get the above result, we'll some more patter matching to extract the final output. Look at the following code sample for that.&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# This code should be written after the above code.&lt;/span&gt;
+&lt;span class="c1"&gt;# We have the element containng the name in the &lt;/span&gt;
+&lt;span class="c1"&gt;# temp_name variable.&lt;/span&gt;
+
+&lt;span class="c1"&gt;# temp_name is currently a list containing all the&lt;/span&gt;
+&lt;span class="c1"&gt;# matches, let&amp;#39;s get the string out of it.&lt;/span&gt;
+&lt;span class="n"&gt;temp_name&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;temp_name&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+
+&lt;span class="c1"&gt;# Replace all \n in the temp_name string&lt;/span&gt;
+&lt;span class="n"&gt;temp_name&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;re&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sub&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;temp_name&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+
+&lt;span class="c1"&gt;# Once we have the string without any newline tags&lt;/span&gt;
+&lt;span class="c1"&gt;# Try to match the pattern&lt;/span&gt;
+&lt;span class="c1"&gt;#&lt;/span&gt;
+&lt;span class="c1"&gt;# The name is between the &amp;gt; and &amp;lt;/ chars&lt;/span&gt;
+&lt;span class="n"&gt;temp_name&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;re&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;findall&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="sa"&gt;r&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;&amp;gt;.*?&amp;lt;/&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;temp_name&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="c1"&gt;# Now we will have a list with the value&lt;/span&gt;
+&lt;span class="c1"&gt;# [&amp;#39;&amp;gt;POP SONGS&amp;lt;/&amp;#39;]&lt;/span&gt;
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;temp_name&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="c1"&gt;# Need to remove those remaining tags now&lt;/span&gt;
+&lt;span class="n"&gt;name&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;re&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sub&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="sa"&gt;r&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;[&amp;gt;&amp;lt;/]&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;temp_name&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Chart name is: &lt;/span&gt;&lt;span class="si"&gt;{}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;name&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Above code will return the name after operating on it. Since the patter of each element containing the name will be same, we can use this logic for any chart URL passed.&lt;/p&gt;
+
+&lt;p&gt;Running the whole code, we get the following code.&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# 1 found&lt;/span&gt;
+&lt;span class="c1"&gt;# [&amp;lt;h1 class=&amp;quot;chart-detail-header__chart-name&amp;quot;&amp;gt;&lt;/span&gt;
+&lt;span class="c1"&gt;# POP SONGS&lt;/span&gt;
+&lt;span class="c1"&gt;# &amp;lt;/h1&amp;gt;]&lt;/span&gt;
+&lt;span class="c1"&gt;# [&amp;#39;&amp;gt;POP SONGS&amp;lt;/&amp;#39;]&lt;/span&gt;
+&lt;span class="c1"&gt;# Chart name is: POP SONGS&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;So we have extracted the chart name. Now what? We can go on and try to extract song names as well from the chart.&lt;/p&gt;
+
+&lt;h2&gt;Checking all cases&lt;/h2&gt;
+
+&lt;p&gt;This is probably a step that can be skipped but be ready to face some bugs. Especially if an API or a large code based app is being built then it's better not to skip this step.&lt;/p&gt;
+
+&lt;p&gt;It is about checking for those cases that might end up giving us errors. For eg: In some charts like the pop-songs chart, the first song is a large div and all the other ones are present in a list. So if we extract the list then we will skip the first song. Thus we need to make sure we look for all the possible cases.&lt;/p&gt;
+
+&lt;p&gt;There is no more to this step. It is a step that will take time to master considering the ability of a person to grasp things and so if the other two steps are understood, this is not really that important for beginners.&lt;/p&gt;
+
+&lt;h2&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;So that's it guys. I finally wrote a how to for web scraping. It's a powerfull skill. I have used it many of my projects, including some pretty large ones. It's also usefull when you don't want to look through a hell lot of API docs of apps like YouTube.&lt;/p&gt;
+
+&lt;p&gt;Also, for referral, the source code of my billboard API (simple one) can be found &lt;a href="https://github.com/deepjyoti30/billboardpy"&gt;here&lt;/a&gt;.&lt;/p&gt;
+</description>
+      <guid isPermaLink="false">https://blog.deepjyoti30.dev/getting-started-with-web-scraping-in-python</guid>
+      <category>python</category>
+      <category>web</category>
+      <category>page</category>
+      <category>scraping</category>
+      <pubDate>Sat, 28 Mar 2020 00:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>Using Heroku as a server for your static page</title>
+      <link>https://blog.deepjyoti30.dev/Using-Heroku-as-a-server-for-your-static-page</link>
+      <description>&lt;p&gt;As you can see, I have my page hosted on github.io domain which probably means it's a static page. But if you scroll down to the end, you'll see a clap icon which probably is not static. The clap icon is, in fact, dynamic and it works by communicating with my server. But wait a minute, isn't this page static? Yes it is.&lt;/p&gt;
+
+&lt;p&gt;I have had a lot of people complain to me about not habing the proper resources like a domain name or a server to host a page, otherwise, they are &lt;em&gt;confident&lt;/em&gt; they would have a million dollar poge. As ironical that sentence is in itself, this post is not about my people nagging me about not having a page, it's about how to not being one.&lt;/p&gt;
+
+&lt;p&gt;I feel like the only thing that make these people say things like that is because of them being not aware about the resources that are available for free and that can be used to do whatever they want. Yes, ofcourse, these &lt;em&gt;free&lt;/em&gt; resources have their own disadvantages but then again, it's &lt;em&gt;free&lt;/em&gt;.&lt;/p&gt;
+
+&lt;h2&gt;Why and How Heroku&lt;/h2&gt;
+
+&lt;p&gt;Before I get to why to use Heroku, let's see why do we need to use a server at all. &lt;br /&gt;
+So a server lets us communicate with it and it and let's us make our page dynamic. That is the content is not &lt;em&gt;hardcoded&lt;/em&gt;, instead it is loaded by asking the server to give us the latest data (or whatever filter you want to use).&lt;/p&gt;
+
+&lt;p&gt;Now the thing is how do frontend communicate with the backend? How do your page ask your server to return you some particular data? Well, simply by using a means to communicate which in this case is an API.&lt;/p&gt;
+
+&lt;p&gt;Now here's the deal, if you can somehow deploy an API on heroku then we can simply make the requests to that API and in return we will get our data. So there we go, this is probably why we will use Heroku to act as our server.&lt;/p&gt;
+
+&lt;p&gt;Now the how part. Well the how is simple. Just learn to write an API in any language you want. I have my API written in Python and then all you have to do is create a new app in Heroku and deploy your app there.&lt;/p&gt;
+
+&lt;p&gt;Yes, it is as simple as that. Well, API writing part might be a bit hard considering your experience with API but anyway, that's it. I have written an &lt;a href="https://deepjyoti30.github.io/blog/have-a-personal-page-for-free"&gt;article&lt;/a&gt; before on how to do that exactly. And &lt;a href="https://www.codementor.io/sagaragarwal94/building-a-basic-restful-api-in-python-58k02xsiq"&gt;here's&lt;/a&gt; the article I referred to build my API.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/frontend_backend.jpg" alt="My laptop" /&gt;&lt;/p&gt;
+
+&lt;p&gt;Once the API is ready and tests are done, it can be deployed very easily to Heroku. The process might differ depending on the languages. However for Python, all it takes is a Procfile where we need to add the command that will run once the app is pushed and that's that.&lt;/p&gt;
+
+&lt;p&gt;After that all the requests can be made to the "appname".herokuapp.com/"endpoint".&lt;/p&gt;
+
+&lt;h2&gt;What's the catch&lt;/h2&gt;
+
+&lt;p&gt;Now that I have showed how simple it is to deploy to Heroku, I really need to describe what the catch is and how to fix that.&lt;/p&gt;
+
+&lt;p&gt;Well, Heroku has an ephemeral filesystem. Every dyno in Heroku has it's own filesystem.&lt;/p&gt;
+
+&lt;p&gt;This means that your data can't be stored in Heroku. This is simply because they have a sleep policy which makes sure each dyno (call it server) sleeps for 1 hour in every 24 hours. But that's not even the actual issue. The issue is after that 1 hour is complete, your app is probably deployed in some other dyno and as I mentioned above, each dyno has their own filesystem, so the new dyno will not have the data that was stored in the older dyno.&lt;/p&gt;
+
+&lt;p&gt;This is critical to our API. If you remember, I have a clap function that keeps track of the claps of any post. But with a filesystem like that, that won't be possible. I didn't even know that was the case untill I started facing issues with my clap related data and other data, so I started researching a bit and found out about the above issue.&lt;/p&gt;
+
+&lt;h2&gt;What's the solution?&lt;/h2&gt;
+
+&lt;p&gt;Well, it's simple. Use a static storage service like aws s3.&lt;/p&gt;
+
+&lt;p&gt;This becomes a bit resource hungry for the API but overall, we can't help it. So what we do is we store all the data in s3 and when our API is supposed to work on it, it just downloads that data from s3 and works on it and then returns the results.&lt;/p&gt;
+
+&lt;p&gt;I personally use s3 along with Heroku and so far I can say it's pretty good. No, there are no catches in using s3.&lt;/p&gt;
+
+&lt;p&gt;For those wondering, I am still on my free trial with AWS and so s3 is free for me. But don't feel like you'll have to use s3. There are probably a lot of alternatives to it and those can be simply used along with Heroku.&lt;/p&gt;
+
+&lt;h2&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;So to sum up, you can use Heroku as a server pretty easily. It's like the perfect solution to use along with a static page. It's free. The only disadvantage with using Heroku is it's ephemeral filesystem which can be fixed by using some static storage service like s3.&lt;/p&gt;
+
+&lt;p&gt;There we go, use the above technologies and you'll have a so-called &lt;em&gt;server&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;I did not write this particularly for those people who come and tell me they don't have enough resources to have a page, but for those who are starting with web development. I just don't want beginners to go through what I went through when I was setting up my page and I wanted it to be free. But I have to say, whenever they do fuss next time, I'll surely send them this article and block them probably.&lt;/p&gt;
+</description>
+      <guid isPermaLink="false">https://blog.deepjyoti30.dev/Using-Heroku-as-a-server-for-your-static-page</guid>
+      <category>heroku</category>
+      <category>s3</category>
+      <category>aws</category>
+      <category>server</category>
+      <pubDate>Thu, 26 Mar 2020 00:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>Owning a Mechanical Keyboard for the first time</title>
+      <link>https://blog.deepjyoti30.dev/owning-a-mechanical-keyboard-for-the-first-time</link>
+      <description>&lt;p&gt;It was around this time last month when I was just scrolling through YouTube and I came across a video that was about Mechanical Keyboards. So, I ended up wondering what's all the hype about. I remember &lt;a href="https://www.reddit.com/r/unixporn/comments/a900p7/awesome_mechanical_love/"&gt;that&lt;/a&gt; post from Unixporn that got so much love from the community.&lt;/p&gt;
+
+&lt;p&gt;After lurking around the r/MechanicalKeyboards subreddit, I figured that there are so many options to decide from. I initially thought that these keyboards are supposed to be built manually but turns out there are many prebuilt options and they aren't even that costly.&lt;/p&gt;
+
+&lt;p&gt;For the prebuilt ones, options are available depending on the size and the switches used.&lt;/p&gt;
+
+&lt;h2&gt;Deciding a switch&lt;/h2&gt;
+
+&lt;p&gt;I started doing a bit of research, my first place to search for information being &lt;strong&gt;r/MechanicalKeyboards&lt;/strong&gt;. I learned that their are different types of switches to choose from depending on what we do with the Keyboard (gaming/typing). I checked &lt;a href="https://www.youtube.com/watch?v=B6LOmc6A5K4&amp;amp;t=143s"&gt;this&lt;/a&gt; YouTube video that explained pretty nicely about different kinds of switches.&lt;/p&gt;
+
+&lt;p&gt;I decided to go with the Cherry MX blue ones. I don't play games and my keyboard is primaryly used for typing. My current linux setup is based on i3-gaps which makes me dependent on the keyboard a bit more than usual. I can pretty easily say that I use my trackpad/mouse only for scrolling and selecting things to copy. Otherwise I can use my setup completely without using a mouse.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/mx_blue.jpg" alt="" /&gt; Cherry MX Blue on my Akko 3068&lt;/p&gt;
+
+&lt;h2&gt;Deciding a size&lt;/h2&gt;
+
+&lt;p&gt;So the basic sizes that these keyboards come in are 65%, 60% and TKL. &lt;br /&gt;
+TKL just stands for Ten Key Less which means it has ten keys less than the usual full sized keyboards. 65% are 65% size of the full sized ones and 60% are 60% of the full sized. The most important difference between 65% and 60% is the inclusion of the dedicated arrow keys.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/tkl_kb.jpg" alt="" /&gt; &lt;a href="https://www.reddit.com/r/MechanicalKeyboards/comments/fjcra1/finished_my_mysterium_tkl_kit/"&gt;u/elevision on Reddit • TKL keyboard, custom build&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;So I thought, I've used these full sized ones before and the smaller ones look kind of good. But I knew I couldn't live without those arrow keys since I use them on a daily basis, way too much, so I decided to go with the 65% ones.&lt;/p&gt;
+
+&lt;p&gt;After searching for a lot of options with what I wanted, I ended up choosing the Keychron K2 and the Akko 3068. Akko, eventually, had a deal with Ducky (pretty famous brand for mech Keyboards) but it ended around May last year (not sure). As it turns out, Keychron K2 was not available here in India and the only option was importing it from US using Amazon. Amazon does assure a delivery within 3 days but they charge 5k for it which is not cool considering the keyboard itself costs 8k.&lt;/p&gt;
+
+&lt;p&gt;Another option was Banggood. They had Akko 3068 and they were charging just around 200 for delivering it to India from China but it would take time. I went with Banggood since I didn't need the keyboard instanly and I had time. So I placed the order and had to wait a month to get it delivered (it got delayed because of COVID-19 issues).&lt;/p&gt;
+
+&lt;h2&gt;Experince of owning a mech&lt;/h2&gt;
+
+&lt;p&gt;So far it's pretty good. After I opened it up, it turned out to be smaller than I had expected but what can you expect from a 68 key keyboard. The keyboard is also pretty heavy, the parcel weighed 1.67 Kgs. The keys are pretty clicky.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/whole_kb.jpg" alt="" /&gt;&lt;/p&gt;
+
+&lt;p&gt;I have to say the best thing is the sound of the keys, it's just so awesome typing on it. It feels like I'm using a typewriter. Really excited to use it at college where there'd be people around, LOL.&lt;/p&gt;
+
+&lt;p&gt;It doesn't have RGB, but it does have some LED's that indicate if the keyboard is charging or if the Caps Lock is on etc. Also seems like the left control button is a bit too far away, I am considering remapping it with the Windows key, which honestly I have no use of. Also the keyboards comes with three different colors of some specific keys like the arrow ones and the space and the enter keys.&lt;/p&gt;
+
+&lt;p&gt;Overall experience is pretty good. I love the fact that the keyboard is so customizable, don't like a keycap color? Change it. Don't like a button being too far away? Remap it. Want lights? Add them (it ain't that easy though, especially for newbies like me.) TaeKeyboards does do that though in his &lt;a href="https://www.youtube.com/watch?v=eD5F-VEqLp8&amp;amp;t=422s"&gt;review&lt;/a&gt; of the Akko 3068.&lt;/p&gt;
+
+&lt;p&gt;Another thing, it does increase typing speed. I don't know if it actually helps or not but since I got it, I have been typing pretty fast and it's really awesome.&lt;/p&gt;
+
+&lt;p&gt;I got it for 7k (with offers) though the actual cost was 8k, but totally worth the price. Can say that this and the Keychron K2 are the best budget 65% mech keyboards anyone can get at the moment.&lt;/p&gt;
+</description>
+      <guid isPermaLink="false">https://blog.deepjyoti30.dev/owning-a-mechanical-keyboard-for-the-first-time</guid>
+      <category>mechanical</category>
+      <category>keyboard</category>
+      <category>personal</category>
+      <category>akko</category>
+      <pubDate>Thu, 19 Mar 2020 00:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>4 lesser known free comment hosting services better than Disqus</title>
+      <link>https://blog.deepjyoti30.dev/4-lesser-known-free-comment-hosting-services-better-than-Disqus</link>
+      <description>&lt;p&gt;A few days ago I was developing a page for a client and one of the requirements was having a comment section in the blog posts, which made me wonder, how should I go about implementing a comment hosting service.&lt;/p&gt;
+
+&lt;p&gt;I &lt;em&gt;did&lt;/em&gt; brainstorm for a while about implementing it on my own but then I had that feeling it would take some time because a lot of things would have to be taken into consideration like anonymous comments, nested comments etc.&lt;/p&gt;
+
+&lt;p&gt;As I am, I ended up looking for open source comment hosting services. First I wondered around the likes of Disqus and spot.im and then I started looking for open source alternatives. I was surprised by the amount of open source software available just for that.&lt;/p&gt;
+
+&lt;p&gt;Sergey Lisakov &lt;em&gt;eventually&lt;/em&gt; has a whole &lt;a href="https://lisakov.com/projects/open-source-comments/"&gt;page&lt;/a&gt; for just that. I have to say this page has it all, each and every open source comment hosting service and we can sort them by a lot of different categories. It's exaggerating in a way, like, which one should I use.&lt;/p&gt;
+
+&lt;p&gt;After a whole lot of &lt;em&gt;Let me try this&lt;/em&gt; and &lt;em&gt;I swear this would be the last one&lt;/em&gt;, I finally zeroed down on 4 of them which I think are the best ones.&lt;/p&gt;
+
+&lt;h2&gt;&lt;a href="https://github.com/posativ/isso"&gt;Isso&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;This one has to be the one that offers the most features. Besides of that, it's written in Python which I'm &lt;em&gt;not&lt;/em&gt; shy to admit, made me lean towards it a bit more.&lt;/p&gt;
+
+&lt;p&gt;Also, it is the only one with almost 4k stars on GitHub which is a big deal.&lt;/p&gt;
+
+&lt;p&gt;The only issue I have with this, which is also the reason I'm not using it currently is because it requires a server to deploy in. However, people like me, who don't have a dedicated server can't even go near using it. So yeah, it's a no go&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/isso_ss.jpg" alt="" /&gt;&lt;/p&gt;
+
+&lt;h4&gt;Pros&lt;/h4&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Markdown support&lt;/li&gt;
+&lt;li&gt;Small, lightweight&lt;/li&gt;
+&lt;li&gt;Supports importing data from Disqus and Wordpress&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4&gt;Cons&lt;/h4&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Not serverless (Biggest disadvantage IMO)&lt;/li&gt;
+&lt;li&gt;UI is not customizable and it's not that visually pleasing TBH&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;&lt;a href="https://github.com/vkuznecovas/mouthful"&gt;Mouthful&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;This one, written in Go and Preact, almost became my comment hosting service. I even wrote the frontend and configured it. I played around with it for a while but I have to say I did find the documentation a bit confusing.&lt;/p&gt;
+
+&lt;p&gt;I thought it's a really good option, considering I was able to customize the UI (it matters to me, I'm not being childish!) and it had all the features that I wanted, especially the option to comment anonymously by default.&lt;/p&gt;
+
+&lt;p&gt;However, turns out I can't use it if I don't have a dedicated server, I thought I would just deploy it on Heroku and then use DynamoDB but then I was really bored.&lt;/p&gt;
+
+&lt;h4&gt;Pros&lt;/h4&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Honeypot feature&lt;/li&gt;
+&lt;li&gt;Supports various DB's like DynamoDB, sqlite, mysql and postgres&lt;/li&gt;
+&lt;li&gt;UI is completely customizable&lt;/li&gt;
+&lt;li&gt;Default UI is really not intuitive but the developer admits of that.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4&gt;Cons&lt;/h4&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Not serverless&lt;/li&gt;
+&lt;li&gt;Comparatively larger with 14kb gzipped size (Isso is 12kb gzipped)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;&lt;a href="https://github.com/cheng-kang/wildfire"&gt;Wildfire&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;This one is like a fusion between Isso and Mouthful. It has a really beautiful UI and has a lot of feature. I seriously looked at their page once and really loved the look.&lt;/p&gt;
+
+&lt;p&gt;However, what drove me away from using it is that it doesn't let users be &lt;em&gt;completely&lt;/em&gt; be anonymous?&lt;/p&gt;
+
+&lt;p&gt;So, they do have an option to comment anonymously but we need to sign in first and then comment. I think they just didn't think about those people who comment anonymously just because they don't want to sign into some strangers site and/or are laxy of doing that.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/wildfire-anonymous-issue.jpg" alt="" /&gt;&lt;/p&gt;
+
+&lt;h4&gt;Pros&lt;/h4&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Markdown support (you guessed it right)&lt;/li&gt;
+&lt;li&gt;Mention @username to reply&lt;/li&gt;
+&lt;li&gt;UI is beautiful and really love those cute avatars for users&lt;/li&gt;
+&lt;li&gt;Serverless&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4&gt;Cons&lt;/h4&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Anonymous is not literally anonymous (read above to understand what I mean)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;&lt;a href="https://github.com/adtac/commento"&gt;Commento&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;This is the one that I am using currently on my page. Read along to know why I chose this one and not the others.&lt;/p&gt;
+
+&lt;p&gt;It literally has everthing that I wanted from a comment hosting service and it is also completely serverless. It has an option to deploy on your own but I went with the serverless one (well, duh).&lt;/p&gt;
+
+&lt;p&gt;So, it is completely anonymous. It's UI is okayish but it's not that bad. Gives me real reddit vibes so I'm good. It supports login in using various social media like GitHub, Twitter... (just scroll down and you'll know).&lt;/p&gt;
+
+&lt;h4&gt;Pros&lt;/h4&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Completely serverless&lt;/li&gt;
+&lt;li&gt;Completely anonymous comments&lt;/li&gt;
+&lt;li&gt;Auto spam detection&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4&gt;Cons&lt;/h4&gt;
+
+&lt;ul&gt;
+&lt;li&gt;UI is okayish but gives reddit vibes&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;Those were the 4 free, open source comment hosting services that I think are the best out there, especially for developers like me.&lt;/p&gt;
+
+&lt;p&gt;It's really simple now, which one to use. If a server is not an issue and you want some customization then go with Mouthful, else go for Isso.&lt;/p&gt;
+
+&lt;p&gt;If you don't have access to a dedicated server and you don't care about introverts who want to keep their real identity hidden, then go with Wildfire, else Commento is the only good option.&lt;/p&gt;
+</description>
+      <guid isPermaLink="false">https://blog.deepjyoti30.dev/4-lesser-known-free-comment-hosting-services-better-than-Disqus</guid>
+      <category>comments</category>
+      <category>hosting</category>
+      <category>disqus</category>
+      <category>hosting</category>
+      <pubDate>Thu, 06 Feb 2020 00:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>Things to do before redesigning your personal page</title>
+      <link>https://blog.deepjyoti30.dev/things-to-do-before-redesigning-your-personal-page</link>
+      <description>&lt;p&gt;I have literally redesigned my personal page a hundred times. I made my page back in 2017. I always wanted to have a personal page but the lack of access to servers and a domain restricted that, until I found GitHub pages. Back then I didn't know what a responsive page was, I was just diving into the world of Web development. I did find about Bootstrap but I jumped the gun and started using it right away. After a few days and endless visits to &lt;em&gt;StackOverflow&lt;/em&gt; I was finally able to get my page on board.&lt;/p&gt;
+
+&lt;p&gt;Though, it was just a basic page. I wanted to make it awesome but I didn't know what I was missing. It was anything but perfect. It has been 2 years since then and I can say that my page, even though not perfect, is good enough. It's &lt;em&gt;responsive&lt;/em&gt;, &lt;em&gt;looks good&lt;/em&gt; and it's &lt;em&gt;fast&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;I believe any page should have these 3 things.&lt;/p&gt;
+
+&lt;h2&gt;Responsive, Fast, Beautiful&lt;/h2&gt;
+
+&lt;p&gt;There are many ways to do that. I learned it the hard way that it's not just my code, sometimes we need to use libraries to make our work easier and the page perform better.&lt;/p&gt;
+
+&lt;h2&gt;Use a library to load images faster&lt;/h2&gt;
+
+&lt;p&gt;I've always admired the way images load on Medium, and I really like it. So one day, I just wondered how I could do something like that in my blogs and as it turns out there are libraries for that.&lt;/p&gt;
+
+&lt;p&gt;The one that can get the medium effect, (which I use BTW) is called &lt;a href="https://github.com/craigbuckler/progressive-image.js"&gt;progressive-image.js&lt;/a&gt;. What it does is loads a low quality version of the actual image when the page is loaded and later, as you scroll through the contents, it loads the rest of the high quality images on the background. Isn't that nice? Go give it a shot, it's super easy to use.&lt;/p&gt;
+
+&lt;p&gt;Source: &lt;a href="https://jmperezperez.com/medium-image-progressive-loading-placeholder/"&gt;José M. Pérez's Blog Post&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2&gt;Use illustrations instead of images&lt;/h2&gt;
+
+&lt;p&gt;Don't know what I'm talking about? Have you seen those pages that have those really cute looking human figures that indirectly convey the message. HINT: Look below.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/thinking.png" alt="" /&gt;&lt;/p&gt;
+
+&lt;p&gt;Still thinking? These illustrations can be got from sites like &lt;a href="https://undraw.co"&gt;unDraw&lt;/a&gt; or &lt;a href="https://freepik.com"&gt;freepik&lt;/a&gt;. The ones available at unDraw are completely open source and they can even be downloaded with the color you like. freepik does give free images but with the condition that the author will be given credit wherever the image is used.&lt;/p&gt;
+
+&lt;h2&gt;Learn to use Bootstrap&lt;/h2&gt;
+
+&lt;p&gt;If you don't already know this, Bootstrap has a really good &lt;a href="https://getbootstrap.com/docs/4.1/getting-started/introduction/"&gt;documentation&lt;/a&gt;. I was damned when I found out the amount of flexibility it gives. I am pretty sure that after redesigning my page so many times, I can safely say that the amount of css I wrote in the beginning has reduced by about 70% after learning about the different features that Bootstrap has.&lt;/p&gt;
+
+&lt;p&gt;I'm not saying that you need to read the whole docs but instead atleast the most used ones. Or we can always keep searching as we keep building the page, that's the approach I take nowadays.&lt;/p&gt;
+
+&lt;p&gt;Anyways, if the solution is not available in the docs, StackOverflow always has it.&lt;/p&gt;
+
+&lt;h2&gt;Use custom fonts&lt;/h2&gt;
+
+&lt;p&gt;Fonts are an important part of the design. What better place to get fonts then Google. Google has a whole &lt;a href="https://fonts.google.com/"&gt;site&lt;/a&gt; dedicated to fonts that can be used for free.&lt;/p&gt;
+
+&lt;p&gt;I'm currently using &lt;a href="https://fonts.google.com/specimen/Roboto+Condensed/"&gt;Roboto Condensed&lt;/a&gt; for the title of the blogs in my page. Experiment using different fonts on your page and keep trying new designs, you'll find the right one. I started with some really weird fonts in the beginning and as I kept trying new ones, I kept changing them.&lt;/p&gt;
+
+&lt;h2&gt;Start using SASS&lt;/h2&gt;
+
+&lt;p&gt;It's not hard. It's really simple and it's not necessary to know it all to actually use it. Use for the small things and gradually learn to do the different things. Anyways, if you have a programming background, which most people reading this post probably have, it's really feels awesome to use it.&lt;/p&gt;
+
+&lt;p&gt;I always thought it's a lot of work to use SASS and I can say I've never been so wrong in my life. All we need is a &lt;em&gt;converter&lt;/em&gt; to convert the sass files to css. I use &lt;a href="https://github.com/sass/sassc"&gt;SassC&lt;/a&gt; which I preferred to use because it's written in C and being a C developer I always have this feeling in the back of my head that C is blazing fast always.&lt;/p&gt;
+
+&lt;h2&gt;Simple is Beautiful&lt;/h2&gt;
+
+&lt;p&gt;I used to think making my page feature packed will make it awesome. That's not true all the time. Yes, having features, a lot of them is a happy addon but making it messy with features is not a good approach to designing your page.&lt;/p&gt;
+
+&lt;p&gt;Try to keep it simple, use all the above points provided, keep it simple. Make awesome, but small, things. If you want to show people how good a developer you are, design the page such that, it's simple and yet has a lot of features. Features that users will find out as they scroll through the page.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Lastly, it's important to understand that, It is NOT necessary to show all the skills you have. While designing the page, keep in mind the users perspective. You don't wanna brag about your skills and at the same time you wanna make sure that they know you're good.&lt;/p&gt;
+
+&lt;p&gt;This last part is the one that people don't understand, mostly newbies. Finding a way to beautifully present yourself such that people love it and don't think you're too much at the same time is a skill you'll develop with time, with a lot of &lt;em&gt;redesigns&lt;/em&gt; of your page.&lt;/p&gt;
+
+&lt;p&gt;Have a Happy New Year guys and try to implement these few points while designing your page and you'll see how you feel good about your page. Good Luck 😉&lt;/p&gt;
+</description>
+      <guid isPermaLink="false">https://blog.deepjyoti30.dev/things-to-do-before-redesigning-your-personal-page</guid>
+      <category>personal</category>
+      <category>page</category>
+      <category>redesign</category>
+      <category>github</category>
+      <pubDate>Tue, 31 Dec 2019 00:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>Write a responsive progressbar for the commandline using Python</title>
+      <link>https://blog.deepjyoti30.dev/responsive-progressbar-for-the-commandline</link>
+      <description>&lt;blockquote&gt;
+  &lt;p&gt;“Everyday life is like programming, I guess. If you love something you can put beauty into it.”&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;We have all seen progressbars everywhere. We see them on websites all the time and those of us who use a Linux distro, looking at a progressbar is like one of our day to day tasks. Especially when you use the terminal like you can nuke a country from it. Progressbars are used by a lot of commandline software's we use. Python's pip use them, npm has an awesome progressbar along with a spinner and our holy pacman, obviously has one too.&lt;/p&gt;
+
+&lt;p&gt;However, progressbars are sometimes messy. If you've used pip more than just a couple of times, it is unavoidable to notice that the progressbar's size is predefined. What that means is, the bar doesn't resize depending on the width of the terminal, messing up the output a lot of times.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/bar.jpg" alt="" /&gt;&lt;/p&gt;
+
+&lt;p&gt;Though, pip's bar might not be responsive, pacman has a really neat bar that hardly screw's up. The length of the bar changes according to the width of the terminal.&lt;/p&gt;
+
+&lt;p&gt;So how can we make a responsive, awesome progressbar ourselves? Read ahead and you'll know.&lt;/p&gt;
+
+&lt;h2&gt;Things to know beforehand.&lt;/h2&gt;
+
+&lt;p&gt;So we need to know first how a bar is actually printed. As we all know, printing a line in the terminal is not big deal, especially with languages like Python. When we print a line, it's printed and goes to the next line (in python), but we want to progressively update the same line if we want to print the bar.&lt;/p&gt;
+
+&lt;p&gt;In this case, we can use \r. It is the carriage return escape sequence which makes sure that we are able to wipe the current line. So what we will do is keep wiping the line and printing every after a while (this just means we can add a gap between printing by using a time library, makes things a bit more efficient). So that we can print a bar pretty easily.&lt;/p&gt;
+
+&lt;p&gt;We are going to use the sys module to do the above mentioned things. So we will keep repeating 3 lines in order to make sure our bar keeps getting updated.&lt;/p&gt;
+
+&lt;p&gt;We need to put it in a loop to make sure that the bar is printed to 100%, after it gets to 100% we can simply break the loop.&lt;/p&gt;
+
+&lt;h2&gt;Making the bar.&lt;/h2&gt;
+
+&lt;p&gt;Now that we know how to print the bar, let's make the bar. We can make a simple repeating the below steps on loop.&lt;/p&gt;
+
+&lt;p&gt;So the things we will have to do are&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Determine the percentage done and percentage left&lt;/li&gt;
+&lt;li&gt;Print # number of done, i:e multiply and print (space) number of left.&lt;/li&gt;
+&lt;li&gt;Sleep for a while, check the progress and print again.&lt;/li&gt;
+&lt;li&gt;Keep repeating untill we reach 100%&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The above code will print a bar of of 20 # after it's done.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/simple_bar.gif" alt="" /&gt;&lt;/p&gt;
+
+&lt;h2&gt;Making it responsive.&lt;/h2&gt;
+
+&lt;p&gt;Now that we have our bar in place, we want to make sure that it respects the width of the terminal window and changes it's length according to it. We can get the width using the os module's popen function.&lt;/p&gt;
+
+&lt;p&gt;After we get the width, we will use it every time before printing the bar. This way, even if we resize the window while the bar is increasing, it will resize itself automatically.&lt;/p&gt;
+
+&lt;p&gt;In the above code, we get the width of the terminal, use a loop to decrease the length of the bar from 40 to 20 to 10 and so on. The length is decreased by half each time.&lt;/p&gt;
+
+&lt;p&gt;After that we use the length to determine how much of the bar we need to show as done by using the formula percent / 100 / bar_len. Here bar_len plays an important role since the amount of bar to be filled is directly related to the length of the bar.&lt;/p&gt;
+
+&lt;p&gt;So, if our bar is of 40 length, then in each percentage increase, the bar will be calculated using percent / (100/ 40) = percent / 2.5.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/responsive_bar.gif" alt="" /&gt;&lt;/p&gt;
+
+&lt;p&gt;So that is how we can make a responsive progressbar for the commandline. In case you want to dive deeper and make your bar better, check my GitHub repo of a downloader where I'm using the same concept to create a progressbar. You can make it so much better, like adding colors, adding other stats regarding the progress like the speed, percentage etc.&lt;/p&gt;
+
+&lt;p&gt;Check the repo &lt;a href="https://github.com/deepjyoti30/downloader-cli"&gt;here&lt;/a&gt;.&lt;/p&gt;
+</description>
+      <guid isPermaLink="false">https://blog.deepjyoti30.dev/responsive-progressbar-for-the-commandline</guid>
+      <category>python</category>
+      <category>cli</category>
+      <category>commandline</category>
+      <category>responsive</category>
+      <pubDate>Sun, 17 Nov 2019 00:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>How I wrote a Telegram bot for Bitbucket using Heroku and Python</title>
+      <link>https://blog.deepjyoti30.dev/how-i-wrote-a-telegram-bot-for-bitbucket</link>
+      <description>&lt;p&gt;So recently I started working on a group project with some of my friends. We did not want to make it opensource but I wanted to make sure we use a version controlling system but GitHub didn't allow having private organization repos without a cost, so we ended up with BitBucket.&lt;/p&gt;
+
+&lt;p&gt;To be honest, BitBucket provides all the features that we get from GitHub except that we don't get a contribution graph. Anyway, so we made a Telegram group to talk about the project whenever necessary and it turned out that after either one of us made a new push, we had to go text in the telegram app to make sure the others knew about it. So, I thought, why not have a bot instead which would send a message whenever someone pushes a new commit (anyway Telegram is pretty famous for their bot API's).&lt;/p&gt;
+
+&lt;p&gt;So I started reading posts on how to do that. So I read &lt;a href="https://www.codementor.io/djangostars/create-deploy-telegram-bot-python-7jggn472x"&gt;this&lt;/a&gt; article. After reading it, I was ready to build my own bot. So what I thought was I can use BitBuckets API.&lt;/p&gt;
+
+&lt;h2&gt;Things to set up&lt;/h2&gt;
+
+&lt;p&gt;So we need to set up some things before we go on with writing our app.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Set up your bot. Read &lt;a href="https://www.siteguarding.com/en/how-to-get-telegram-bot-api-token"&gt;this&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Set up a &lt;a href="https://signup.heroku.com/"&gt;Heroku&lt;/a&gt; account, we need that because that's where we are going to deploy the app.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;My first attempt at the bot didn't work and it was, TBH wasn't the right way to do it. The second attempt is the proper way to do it.&lt;/p&gt;
+
+&lt;h3&gt;First Attempt&lt;/h3&gt;
+
+&lt;p&gt;I wrote a python app that would be on an infinite loop and keep checking the current commits, in case a new commit arrives, it will use Telegram's API to send a message. This way was pretty resource hungry and Heroku always used to shut my app because it didn't get any requests at all. It obviously didn't work and so I had to find another way to make my bot work.&lt;/p&gt;
+
+&lt;h3&gt;Second Attempt&lt;/h3&gt;
+
+&lt;p&gt;Let's write our python app first. We will be using the token of the bot to send the message.&lt;/p&gt;
+
+&lt;p&gt;Replace the bot token with the token that you got earlier. We will be using this function to send the message. Next, we need to write the code for our server that is going to listen to when a POST request is sent by Bitbucket.&lt;/p&gt;
+
+&lt;p&gt;Before we do that, we need to write a function to build a message from the data that we have just got.&lt;/p&gt;
+
+&lt;p&gt;After we are done writing this functions, the next thing we do is write our &lt;code&gt;flask&lt;/code&gt; app. We need to make sure that it is listening for a POST request and when we get one, we will extract the data, build a message about it and then send it.&lt;/p&gt;
+
+&lt;p&gt;Replace the &lt;code&gt;chat_id&lt;/code&gt; with the ID of the bot.&lt;/p&gt;
+
+&lt;p&gt;And our app is done. We can now push the app to our heroku app. We need to make a new app on heroku and then push it, directly from the commandline using &lt;code&gt;git&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h3&gt;Set Up BitBucket webhook.&lt;/h3&gt;
+
+&lt;p&gt;Now we need to enable the webhook. This webhooks act according to the trigger events that we select while setting up the hooks. Read &lt;a href="https://developer.atlassian.com/bitbucket/api/2/reference/resource/repositories/%7Busername%7D/%7Brepo_slug%7D/hooks#post"&gt;this&lt;/a&gt; article.&lt;/p&gt;
+
+&lt;p&gt;So we will enable them for push events. Everytime someone makes a push request to the repo, we will get a POST request to our heroku app. We can enable the webhook by making a POST request to their API. Replace the &lt;code&gt;url&lt;/code&gt; with the name of the app. For eg: &lt;code&gt;yourapp.heroku.com/webhook&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;That is it. We wrote a simple bot for BitBucket. Sit back and make a push to the repo that you enabled the webhook in. You will get a message on your Telegram.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/telegram_ss.png" alt="" /&gt;&lt;/p&gt;
+</description>
+      <guid isPermaLink="false">https://blog.deepjyoti30.dev/how-i-wrote-a-telegram-bot-for-bitbucket</guid>
+      <category>telegram</category>
+      <category>bot</category>
+      <category>bitbucket</category>
+      <category>open</category>
+      <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>Have your own page for free</title>
+      <link>https://blog.deepjyoti30.dev/have-a-personal-page-for-free</link>
+      <description>&lt;p&gt;I have my whole personal page on Github and it's been here since last year. Yes, I know a lot of people have their page on GitHub but what &lt;em&gt;a lot&lt;/em&gt; of people don't do is use Heroku to make it dynamic which I'm going to tell you how to do.&lt;/p&gt;
+
+&lt;p&gt;But before that, just in case you don't know how to setup a page on GitHub for free or don't have any experience with GitHub at all then read along this part of the article, else just move on to the Heroku part. I'm not going to talk about setting up GitHub pages because honestly, a lot of people have done that and even Github has their own page to help you set it up. Check it &lt;a href="https://pages.github.com/"&gt;here&lt;/a&gt;. So GitHub, has two options to set up the page.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;You can setup by using the themes provided by GitHub (&lt;em&gt;not recommended&lt;/em&gt;)&lt;/li&gt;
+&lt;li&gt;You can make your own page using html, css, jquery etc.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I don't think it is possible to make GET, POST requests by using the Jekyll themes, so the obvious option to go with is making your own page by writing an index.html of your own. After that you can make changes to it all you want and the GET and POST request to the servers can be made by using jquery or JS.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h2&gt;Why use Heroku?&lt;/h2&gt;
+
+&lt;p&gt;We need a server to make our page dynamic. To store data that would be altered while the page is being used by different users and while searching for an option I found out about Heroku. Go set up your own accout &lt;a href="https://signup.heroku.com/"&gt;there&lt;/a&gt; because we're sure going to need one.&lt;/p&gt;
+
+&lt;h2&gt;Writing our API&lt;/h2&gt;
+
+&lt;p&gt;I referred to &lt;a href="https://www.codementor.io/sagaragarwal94/building-a-basic-restful-api-in-python-58k02xsiq"&gt;this&lt;/a&gt; article to build a restful API using Python. We can write it using any language we want.&lt;/p&gt;
+
+&lt;p&gt;I used Flask to build the API. I wanted to make a clap function similar to one that we see in Medium articles. So the first thing I did was write a simple API that takes an ID to keep the number of claps of different posts. It is a simple API. Whenever we make a GET request it would check the ID and return the number of claps. If a POST request is made to that endpoint it increases the number of clap counts by 1 for the passed ID. I did add the basic checks, like if an ID is invalid, if a new ID is sent then add the ID to the file of claps. Yes, I said &lt;em&gt;file&lt;/em&gt; of claps. Well I thought I would use a dbms like sqlie but I rather went with saving the claps in a json file.&lt;/p&gt;
+
+&lt;h2&gt;The catch?&lt;/h2&gt;
+
+&lt;p&gt;Before you think of pushing this app, we need to add a simple thing to our Python file. The file that we will be using as the server. We need to enable &lt;strong&gt;Cross Origin Resource Sharing&lt;/strong&gt; (CORS). What it is? It basically stops anyone from making a request to your server, so when you try to make a request from the page that is stored on GitHub pages, it will stop you from doing so. This is because the server we are making the request to and the server where the pages that are making the request are different. Thus, we need to enable it in our Flask app. Just add the following lines of code&lt;/p&gt;
+
+&lt;p&gt;After the testing is done, we can push the app to Heroku. All we have to do is make a new app on Heroku and then push the app. It's similar to using git. We can use Heroku from either the commandline or from their page. I prefer to use the cli app since its pretty simple and also I'm a sucker for cli apps. Get the Heroku CLI app from the package manager you use, or check their guide to download and install it &lt;a href="https://devcenter.heroku.com/articles/heroku-cli"&gt;here&lt;/a&gt;. Make sure you are logged in to your heroku account first, use &lt;code&gt;heroku login&lt;/code&gt; to do that. After that's done, use the following.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;heroku create appname
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;em&gt;Replace appname with the name of the app&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;We can continue with the usual loop of &lt;code&gt;add, commit and push&lt;/code&gt; after this, as long as we want. Make sure to use &lt;code&gt;git push heroku master&lt;/code&gt; to push to the master branch of the current app.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="https://media.giphy.com/media/26BGMfrupkRx68NwY/giphy.gif" alt="" /&gt;&lt;/p&gt;
+
+&lt;p&gt;With every build, Heroku will build the app and then deploy it in a new dyno. Read more about Heroku dynos &lt;a href="https://www.heroku.com/dynos"&gt;here&lt;/a&gt;. Heroku follows a ephemeral filesystem. Each dyno has its own ephemeral filesystem. Read &lt;a href="https://devcenter.heroku.com/articles/getting-started-with-python?singlepage=true"&gt;this&lt;/a&gt; article to know more about deploying your app with python.&lt;/p&gt;
+
+&lt;h2&gt;Things to look out for&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Heroku has a sleep policy that every dyno needs to get 6 hours of sleep every day.&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;This simply means that the dyno that your app is deployed on will go to sleep if it is idle for an hour. After it gets a new request, it will come back to working again. &lt;strong&gt;However&lt;/strong&gt;, when a dyno &lt;em&gt;wakes&lt;/em&gt; up, there's more to it than what it sounds like. With every wakeup, your app is deployed in a new dyno, this is why it's said to have an &lt;em&gt;ephemeral filesystem&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;Due to this, if you make request to the endpoint after like 1 hour of the last request, it takes a bit of time to return the response. That happens clearly because the dyno restarts and then executes the app and returns accordingly.&lt;/p&gt;
+
+&lt;p&gt;You can always make other API's. I used the same idea to deploy another app which make sure's I get an email when someone clicks on that send button on the form in the homepage. I used Sendgrid to send the email and basic python to make sure nobody is able to spam.&lt;/p&gt;
+
+&lt;p&gt;That's it for this article, hit that clap button if you want to send a POST request to my dyno or you could always do that to show me some love.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;I will be writing another post to show how to use static files on Heroku apps. Keep a lookout for that.&lt;/em&gt;&lt;/p&gt;
+</description>
+      <guid isPermaLink="false">https://blog.deepjyoti30.dev/have-a-personal-page-for-free</guid>
+      <category>github</category>
+      <category>static</category>
+      <category>page</category>
+      <category>personal</category>
+      <pubDate>Wed, 16 Oct 2019 00:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>About me</title>
+      <link>https://blog.deepjyoti30.dev/about-me</link>
+      <description>&lt;p&gt;Hi, I am Deepjyoti. I am a developer. My interest in gadgets started when I got my first phone. Ofcourse it was an Android phone and it had a real slow processor.&lt;/p&gt;
+
+&lt;p&gt;That forced me to jump into the world of custom ROM's. Eventually I came across developers who were respected a lot for building these ROM's. I then felt this urge that even I want something like that.&lt;/p&gt;
+
+&lt;p&gt;Fast forward 2 years, I opted for Computer Science in High School. Thats where i started learing C++. After a year of learning C++, I wanted to make things that people would use, that would make their lives simpler. So I learnt Python.&lt;/p&gt;
+
+&lt;p&gt;Since then I have never looked back. Off late I have also developed an interest in customizing my laptop, software wise. This fascination started when I started using Ubuntu and came across a subreddit called &lt;a href="https://reddit.com/r/unixporn"&gt;unixporn&lt;/a&gt;. I now take great joy in customizing my setup. Do check it out &lt;a href="https://github.com/deepjyoti30/dotfiles"&gt;here&lt;/a&gt; and &lt;a href="https://github.com/deepjyoti30/dots"&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/ytmdl.png" alt="ytmdl" /&gt;&lt;/p&gt;
+
+&lt;p&gt;I use a Dell laptop, the one in the cover of this article? Yeah, that's right. I have Manjaro i3 installed on it. I love using cli based applications. I try to do almost everything from the commandline. Why almost? Beacuse some things are, even though possible, just not possible (fun is the word) from the commandline. I mean, I just don't want to browse from the cli. I like appreciating &lt;em&gt;magical things&lt;/em&gt; that frontend developers do with their pages and thats just not possible from the cli.&lt;/p&gt;
+
+&lt;p&gt;I also like listening to music, I mean I call it my hobby sometimes (who doesn't?). I go cli completely on music though. Streaming it? I use playx (check homepage for links). Local music? MPD + ncmpcpp it is! Off late, I have taken an interest in dev-ops. I mean I'm fascinated by the ammount of automation I would have to do to make peoples lives easier. I think its really cool how dev-ops works.&lt;/p&gt;
+
+&lt;p&gt;Currently I'm a sophomore in college and I'm studying Computer Science (as if it was that hard to guess). You can always check my linkedIn for other details. So basically, I'm a guy with a lot of interest in technology. BTW, did I tell you that now I use a fairly better phone than the one that I mentioned earlier, yes, my first phone. So the current one is good, it has a pop-up camera and all and I still install custom ROMs on it. I just can't get enough of this freedom I get by using custom ROMs and wild card to all new Android updates. Also, I'm a huge Android fan.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;I keep updating this article with my latest interests and other stuff though, so you can always check it once in a while. ;-p&lt;/em&gt;&lt;/p&gt;
+</description>
+      <guid isPermaLink="false">https://blog.deepjyoti30.dev/about-me</guid>
+      <category>about</category>
+      <category>me</category>
+      <category>personal</category>
+      <category>deepjyoti30</category>
+      <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>Github and people who steal</title>
+      <link>https://blog.deepjyoti30.dev/github-and-people-who-steal</link>
+      <description>&lt;p&gt;I have been using Github for a while now. If I have a project in mind, the first thing I do is make a new repo on github and then start with the project. It was around May (or June maybe) of 2018 when I had posted on Reddit about my project &lt;a href="https://github.com/deepjyoti30/ytmdl"&gt;ytmdl&lt;/a&gt; to check peoples response to it. That was when I came across &lt;a href="https://github.com/NISH1001/playx"&gt;playx&lt;/a&gt;. So &lt;a href="https://github.com/NISH1001"&gt;Nishan&lt;/a&gt; mentioned his project on the comments suggesting he had been working on something similar to my project. As I was, I opened the page and checked it. Turns out there were a lot of TODO's listed. I was free then, so I forked it and started working.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/reddit-comment.jpg" alt="Nishan's comment on my ytmdl post." /&gt; Nishan's comment on my post&lt;/p&gt;
+
+&lt;p&gt;What started as a fun project quickly turned into an utility that I got adddicted to working on. I still remember making pull requests before sleeping every night at around 3 A.M. and every morning the first thing I'd check for is if the PR is approved or if Nishan has made any comments. I can say I enjoyed working on the project and a lot of it was because of Github. The simplicity of making PR's and getting them merged in the original code.&lt;/p&gt;
+
+&lt;p&gt;However, recently something happened that shook us both. We couldn't decide if we should laugh or get angry. Somebody stole our project. It was not a fork of the project, instead this person made a new repository and named it &lt;em&gt;layx&lt;/em&gt; which is &lt;em&gt;playx&lt;/em&gt; without a p. And the code, it was &lt;strong&gt;our&lt;/strong&gt; code. All I could think of was the late night PR's that I had made and how I have spent so much time working on it and it was all not mine anymore. On top of that, he didn't even care to change the README (that was offensive, he didn't care to fix the bugs.). The logo, it was the same logo that one developer has contributed to our project, just without a p. He even shared the project on Reddit and thats where Nishan came across it.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/layx.jpg" alt="" /&gt; layx posted on reddit&lt;/p&gt;
+
+&lt;p&gt;Yes I know we had a license but we felt helpless. Nishan opened a pull request asking this guy to take the repository down. He replied by closing it and saying it'll work differently to playx because it will take data from spotify (even I don't know why he thinks copying our code, making changes and branding it his, made sense). I asked Nishan if he has taken any action. He said he has contacted github but they said they can't help. He even tweeted. Later I opened a PR on this &lt;em&gt;layx&lt;/em&gt; repo and asked him to take it down or we would take legal action.&lt;/p&gt;
+
+&lt;p&gt;By this time, Nishan had already asked for a DMCA takedown of the project and the next day I got a mail from Nishan telling me that the guy deleted all our code from the repo and added java code there. Also, github had responded to tweets by Nishan by this time and later he had to tell them that it was settled.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/dec-PR.png" alt="" /&gt; Pull request of Dec 31&lt;/p&gt;
+
+&lt;p&gt;Now here's what makes me scared. Even though I have licensed my projects, what if someday, some random guy copies all my code and brands it his. I know I have legal solutions to problems like this but what I don't understand is do I deserve this, do my time deserve being wasted like this? Just because some guy thought it would be funny or he didn't know the rules. What's even worse is I wouldn't even know if he's using my project would he not feel like sharing it on places like Reddit.&lt;/p&gt;
+
+&lt;p&gt;As I am writing this post, I can only imagine how many other people are working hard, missing their sleep just to make that last PR and how many people are cloning someone's project to make it their own.&lt;/p&gt;
+
+&lt;p&gt;Github is a big company and I'm really positive it has the power to take actions on things like this. I know it'd be a big step but I really think, its time Github starts taking things like this seriously or it's going to directly effect the opensource community that we take pride working in.&lt;/p&gt;
+</description>
+      <guid isPermaLink="false">https://blog.deepjyoti30.dev/github-and-people-who-steal</guid>
+      <category>github</category>
+      <category>steal</category>
+      <category>copyright</category>
+      <category>playx</category>
+      <pubDate>Sat, 10 Aug 2019 00:00:00 +0000</pubDate>
+    </item>
+  </channel>
+</rss>
