@@ -13,7 +13,189 @@
       <link>https://blog.deepjyoti30.dev/feed</link>
     </image>
     <language>en</language>
-    <lastBuildDate>Fri, 20 Nov 2020 05:06:29 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 20 Nov 2020 14:08:47 +0000</lastBuildDate>
+    <item>
+      <title>Add tab autocomplete for your commandline apps</title>
+      <link>https://blog.deepjyoti30.dev/tab-autocomplet-cli-apps</link>
+      <description>&lt;p&gt;It so happens a lot of times that we don't notice small things that help us a lot in our day to day life. Since I am most of the time in front of the terminal, one feature that helps me a lot is the ability to autocomplete.&lt;/p&gt;
+
+&lt;p&gt;I know it's a simple, sweet feature but it is something I use a lot in my everyday usage of the Terminal. So I started wondering, how do I add something like that to &lt;a href="https://github.com/deepjyoti30/ytmdl"&gt;ytmdl&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;I came across &lt;a href="https://eli.thegreenplace.net/2013/12/26/adding-bash-completion-for-your-own-tools-an-example-for-pss"&gt;this article&lt;/a&gt;. It is pretty detailed for &lt;code&gt;bash&lt;/code&gt;. However I also wanted to add support for &lt;code&gt;zsh&lt;/code&gt; since that's the shell I use.&lt;/p&gt;
+
+&lt;h1&gt;How does it work?&lt;/h1&gt;
+
+&lt;p&gt;So how does this feature exactly work? It is simple. We create a file with a chunk of code (written in shell) and we save it in a particular location. From this location the file will be automatically picked up by the shell and it will accordingly start showing autocomplete suggestions.&lt;/p&gt;
+
+&lt;h2&gt;Before writing the file&lt;/h2&gt;
+
+&lt;p&gt;So in our chunk of code, we will keep a list of options and from there the shell will be automatically able to suggest options. But it would be pretty tedious if we have to manually update the shell file with options that our commandline app would support everytime.&lt;/p&gt;
+
+&lt;p&gt;Thus we will add a new option to our commandline app. When this option (or flag) will be passed, our app will just print a space seperated list of options to the console and exit. This way, we will be able to use this command in our shell file whenever we want to build it.&lt;/p&gt;
+
+&lt;p&gt;In my case, I added a flag named &lt;code&gt;--get-opts&lt;/code&gt; to my app (ytmdl). I then made sure that this flag is hidden by the argument parser so that users do not see it directly.&lt;/p&gt;
+
+&lt;p&gt;This can be done in the following way for Python with the argparse module&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;parser&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;add_argument&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;--get-opts&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;action&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;store_true&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;help&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;argparse&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;SUPPRESS&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="c1"&gt;# And later in the code, check for the option and accordingly generate a list of&lt;/span&gt;
+&lt;span class="c1"&gt;# options&lt;/span&gt;
+&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get_opts&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot; &amp;quot;&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;--&lt;/span&gt;&lt;span class="si"&gt;{}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;opt&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;replace&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;_&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;-&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;opt&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;vars&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="p"&gt;))))&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h2&gt;Writing the completion file for Bash&lt;/h2&gt;
+
+&lt;p&gt;Even though the file will be pretty much same for all the shells, there are certain differences which needs to be maintained.&lt;/p&gt;
+
+&lt;p&gt;The file should be written in the following way:&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;_ytmdl_complete&lt;span class="o"&gt;()&lt;/span&gt;
+&lt;span class="o"&gt;{&lt;/span&gt;
+    &lt;span class="nb"&gt;local&lt;/span&gt; cur_word prev_word type_list
+
+    &lt;span class="c1"&gt;# COMP_WORDS is an array of words in the current command line.&lt;/span&gt;
+    &lt;span class="c1"&gt;# COMP_CWORD is the index of the current word (the one the cursor is&lt;/span&gt;
+    &lt;span class="c1"&gt;# in). So COMP_WORDS[COMP_CWORD] is the current word; we also record&lt;/span&gt;
+    &lt;span class="c1"&gt;# the previous word here, although this specific script doesn&amp;#39;t&lt;/span&gt;
+    &lt;span class="c1"&gt;# use it yet.&lt;/span&gt;
+    &lt;span class="nv"&gt;cur_word&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;COMP_WORDS&lt;/span&gt;&lt;span class="p"&gt;[COMP_CWORD]&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+    &lt;span class="nv"&gt;prev_word&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;COMP_WORDS&lt;/span&gt;&lt;span class="p"&gt;[COMP_CWORD-1]&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+
+    &lt;span class="c1"&gt;# Ask ytmdl to generate a list of types it supports&lt;/span&gt;
+    &lt;span class="nv"&gt;type_list&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="sb"&gt;`&lt;/span&gt;ytmdl --get-opts&lt;span class="sb"&gt;`&lt;/span&gt;
+
+    &lt;span class="c1"&gt;# Only perform completion if the current word starts with a dash (&amp;#39;-&amp;#39;),&lt;/span&gt;
+    &lt;span class="c1"&gt;# meaning that the user is trying to complete an option.&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="o"&gt;[[&lt;/span&gt; &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;cur_word&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; -* &lt;span class="o"&gt;]]&lt;/span&gt; &lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="k"&gt;then&lt;/span&gt;
+        &lt;span class="c1"&gt;# COMPREPLY is the array of possible completions, generated with&lt;/span&gt;
+        &lt;span class="c1"&gt;# the compgen builtin.&lt;/span&gt;
+        &lt;span class="nv"&gt;COMPREPLY&lt;/span&gt;&lt;span class="o"&gt;=(&lt;/span&gt; &lt;span class="k"&gt;$(&lt;/span&gt;&lt;span class="nb"&gt;compgen&lt;/span&gt; -W &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;type_list&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; -- &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;cur_word&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="k"&gt;)&lt;/span&gt; &lt;span class="o"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;else&lt;/span&gt;
+        &lt;span class="nv"&gt;COMPREPLY&lt;/span&gt;&lt;span class="o"&gt;=(&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;type_list&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;fi&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;
+&lt;span class="o"&gt;}&lt;/span&gt;
+
+&lt;span class="c1"&gt;# Register _ytmdl_complete to provide completion for the following commands&lt;/span&gt;
+&lt;span class="nb"&gt;complete&lt;/span&gt; -F _ytmdl_complete ytmdl
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The code pretty self explanatory. I have defined a function. This function uses the &lt;code&gt;current word&lt;/code&gt; in order to check if it starts with a &lt;code&gt;-&lt;/code&gt;. If it does, it means we need to suggest the options. In that case we are generating related words by using the &lt;code&gt;compgen&lt;/code&gt; command. This command will return all the options that start with the given current word.&lt;/p&gt;
+
+&lt;p&gt;If the current word does not start with a &lt;code&gt;-&lt;/code&gt; we are suggesting all the possible options.&lt;/p&gt;
+
+&lt;p&gt;The last line &lt;code&gt;complete ...&lt;/code&gt; basically tells the shell (bash in this case) to call the function for the command &lt;code&gt;ytmdl&lt;/code&gt;. It can be followed by more commands where this function should be called for completions.&lt;/p&gt;
+
+&lt;p&gt;For example, to complete the command &lt;code&gt;ytmdl&lt;/code&gt; and &lt;code&gt;ytm&lt;/code&gt; with the suggestions, we can do something like this.&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nb"&gt;complete&lt;/span&gt; -F _ytmdl_complete ytmdl ytm
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Once we have the file ready, we need to place it in a directory from where it can be recognized by the shell.&lt;/p&gt;
+
+&lt;p&gt;For bash this directory is:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;**/etc/bash_completion.d**&lt;/code&gt; or &lt;code&gt;**/usr/share/bash-completion/completions/**&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Just place the file in either of the above directories and it try to run the command. Click tab after typing the command and you will see your suggestions.&lt;/p&gt;
+
+&lt;h2&gt;Writing the completion file for zsh&lt;/h2&gt;
+
+&lt;p&gt;In zsh, the logic remains same. We have a file that will be put in a specific directory and will be picked up by the shell. Just the syntax differs a bit.&lt;/p&gt;
+
+&lt;p&gt;The file for ZSH will be the following:&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;#compdef ytmdl&lt;/span&gt;
+
+__ytmdl&lt;span class="o"&gt;()&lt;/span&gt; &lt;span class="o"&gt;{&lt;/span&gt;
+    &lt;span class="nb"&gt;local&lt;/span&gt; &lt;span class="nv"&gt;curcontext&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$curcontext&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; cur_word
+    &lt;span class="nb"&gt;typeset&lt;/span&gt; -A opt_args
+
+    &lt;span class="nv"&gt;cur_word&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nv"&gt;$words&lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;CURRENT&lt;span class="o"&gt;]&lt;/span&gt;
+    &lt;span class="nv"&gt;type_list&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="sb"&gt;`&lt;/span&gt;ytmdl --get-opts&lt;span class="sb"&gt;`&lt;/span&gt;
+
+    &lt;span class="c1"&gt;# Only perform completion if the current word starts with a dash (&amp;#39;-&amp;#39;),&lt;/span&gt;
+    &lt;span class="c1"&gt;# meaning that the user is trying to complete an option.&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="o"&gt;[[&lt;/span&gt; &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;cur_word&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; -* &lt;span class="o"&gt;]]&lt;/span&gt; &lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="k"&gt;then&lt;/span&gt;
+        &lt;span class="c1"&gt;# COMPREPLY is the array of possible completions, generated with&lt;/span&gt;
+        &lt;span class="c1"&gt;# the compgen builtin.&lt;/span&gt;
+        _arguments &lt;span class="s1"&gt;&amp;#39;*: :( $(compgen -W &amp;quot;${type_list}&amp;quot; -- ${cur_word}) )&amp;#39;&lt;/span&gt;
+    &lt;span class="k"&gt;else&lt;/span&gt;
+        _arguments &lt;span class="s1"&gt;&amp;#39;*: :( &amp;quot;${type_list}&amp;quot; )&amp;#39;&lt;/span&gt;
+    &lt;span class="k"&gt;fi&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;
+&lt;span class="o"&gt;}&lt;/span&gt;
+
+__ytmdl
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;In this file, we have the &lt;code&gt;__ytmdl&lt;/code&gt; function which is called in order to generate the suggestions.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;NOTE: In zsh completion file, the first line should be as above. It should be &lt;code&gt;compdef &amp;lt;command_name&amp;gt;&lt;/code&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;In this the command (that is to be completed) is passed in the first line of the file and rest of the code is just normal shell code. We have a function which is called to generate the options. The options are then passed to zsh by using the &lt;code&gt;_arguments&lt;/code&gt; variable which is automatically picked up by zsh BTW.&lt;/p&gt;
+
+&lt;p&gt;For zsh, the directory is:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;**/usr/share/zsh/site-functions/**&lt;/code&gt; or &lt;code&gt;**/usr/share/zsh/functions/Completion/Unix/**&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;After putting the file in the above directory, to make sure the file is loaded the following can be done:&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# source the rc file&lt;/span&gt;
+&lt;span class="nb"&gt;source&lt;/span&gt; ~/.zshrc
+
+&lt;span class="c1"&gt;# Load the function&lt;/span&gt;
+autoload -U __ytmdl  &lt;span class="c1"&gt;# Here the function name is __ytmdl, replace accordingly.&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;For more details about writing zsh completion files, check &lt;a href="https://github.com/zsh-users/zsh-completions/blob/master/zsh-completions-howto.org"&gt;this GitHub doc&lt;/a&gt;. It is pretty detailed and useful if you want to dive deep into writing a nice optimized completion file.&lt;/p&gt;
+
+&lt;h2&gt;Tips&lt;/h2&gt;
+
+&lt;p&gt;Okay, now that you have written your completion file, what next? Well, there's one thing else that you can still do in order to optimize the file. That is, since in the completion file the options are loaded by running the command &lt;code&gt;ytmdl --get-opts&lt;/code&gt;. This means everytime the user will click on the tab button twice, your app (in this case &lt;code&gt;ytmdl&lt;/code&gt;) will be called. That is not necessary and will be slow since we can call the function once and hardcode the options when the file is built.&lt;/p&gt;
+
+&lt;p&gt;Here's how we can do it. First of all, replace the command in the completion file with a replaceable content, something like the following:&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# type_list=`ytmdl --get-opts`&lt;/span&gt;
+&lt;span class="c1"&gt;# Replace the above line with the below line&lt;/span&gt;
+&lt;span class="nv"&gt;type_list&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;{{static_opts}}&amp;quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Once you have done that, we can write a simple python script (you can write in whatever language you want) to fill that static variable.&lt;/p&gt;
+
+&lt;p&gt;The idea is to read the contents of the file, find this static variable and replace it with the options and write the output to a file. This final file will be the completion file that can be copied to the necessary directory.&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Lets say the template file is zsh-completion.in&lt;/span&gt;
+&lt;span class="c1"&gt;# and the output file is ytmdl.zsh&lt;/span&gt;
+&lt;span class="n"&gt;TEMPLATE&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;zsh-completion.in&amp;quot;&lt;/span&gt;
+&lt;span class="n"&gt;FINAL_FILE&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;ytmdl.zsh&amp;quot;&lt;/span&gt;
+
+&lt;span class="n"&gt;opts&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;&amp;quot;&lt;/span&gt; &lt;span class="c1"&gt;# string of options seperated by space.&lt;/span&gt;
+
+&lt;span class="n"&gt;content&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;open&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;TEMPLATE&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;read&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;span class="n"&gt;content&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;content&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;replace&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;{{static_opts}}&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;opts&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="c1"&gt;# Write the file now&lt;/span&gt;
+&lt;span class="k"&gt;with&lt;/span&gt; &lt;span class="nb"&gt;open&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;FINAL_FILE&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;w&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;w&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;w&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;write&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;content&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Above script will fill the &lt;code&gt;{{static_opts}}&lt;/code&gt; with the proper options and then the final file can be copied to the directory.&lt;/p&gt;
+
+&lt;p&gt;Thanks to &lt;a href="https://github.com/ytdl-org/youtube-dl"&gt;youtube-dl&lt;/a&gt; for the idea of dynamic filling using a python script.&lt;/p&gt;
+</description>
+      <guid isPermaLink="false">https://blog.deepjyoti30.dev/tab-autocomplet-cli-apps</guid>
+      <category>tab</category>
+      <category>autocomplete</category>
+      <category>commandline</category>
+      <category>cli</category>
+      <pubDate>Fri, 20 Nov 2020 14:08:47 +0000</pubDate>
+    </item>
     <item>
       <title>I created my own blog management system. Here's how I did it.</title>
       <link>https://blog.deepjyoti30.dev/created-own-blog</link>
@@ -423,7 +605,7 @@
 
 &lt;p&gt;Here's how we will get it to work. We will use Mopidy along with Mopidy Spotify to get our Spotify data and play songs etc. So we have our backend ready. Once that's done, we will configure ncmpcpp to work with mopidy in order to make our frontend work as well. So we have our frontend ready as well.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/process_spotify_cli.jpg" alt="How Spotify CLI works with Mopidy" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://raw.githubusercontent.com/deepjyoti30/blog-static-content/master/content/process_spotify_cli.jpg" alt="How Spotify CLI works with Mopidy" /&gt;&lt;/p&gt;
 
 &lt;p&gt;The above image sums it up nicely. How the whole thing is going to work.&lt;/p&gt;
 
@@ -477,7 +659,7 @@
 
 &lt;p&gt;Once the above configurations are done, we are good to start using Spotify from the CLI. Just run &lt;strong&gt;mopidy&lt;/strong&gt; in order to start the daemon/backend.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/ncmpcpp_playlist.jpg" alt="ncmpcpp playlist window" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://raw.githubusercontent.com/deepjyoti30/blog-static-content/master/content/ncmpcpp_playlist.jpg" alt="ncmpcpp playlist window" /&gt;&lt;/p&gt;
 
 &lt;p&gt;Once mopidy is running, open ncmpcpp in another window or push mopidy to background and open in the same window. You might see an empty window, this would probably because ncmpcpp loads up by default the now playing screen and since we haven't played anything yet, it would be empty.&lt;/p&gt;
 
@@ -527,7 +709,7 @@
 
 &lt;p&gt;So browsers have this neat feature that if we hover the cursor on top of some element, the element lights up in the page.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/cursor_hover_effect.jpg" alt="Cursor hover effect chrome" /&gt; Element lights up on mouse hover&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://raw.githubusercontent.com/deepjyoti30/blog-static-content/master/content/cursor_hover_effect.jpg" alt="Cursor hover effect chrome" /&gt; Element lights up on mouse hover&lt;/p&gt;
 
 &lt;p&gt;Once you figure out how to use this feature, dive into the code. Go to the part of the page, the data that you want from the page. After that start hovering on elements and get to the inner most element that actually contains the data.&lt;/p&gt;
 
@@ -535,7 +717,7 @@
 
 &lt;p&gt;So probably the element containing the chart name is somewhere inside the main element. Click on it and open it. Go through all the elements untill you find the element that's containing the chart name exactly. This is the element we are going to use to extract the name of the chart.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/chart_name.jpg" alt="Chart Name element" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://raw.githubusercontent.com/deepjyoti30/blog-static-content/master/content/chart_name.jpg" alt="Chart Name element" /&gt;&lt;/p&gt;
 
 &lt;p&gt;Now that we have the element containing the name of the chart, let's try to see if the class name of this element is unique.&lt;/p&gt;
 
@@ -694,7 +876,7 @@ So a server lets us communicate with it and it and let's us make our page dynami
 
 &lt;p&gt;Yes, it is as simple as that. Well, API writing part might be a bit hard considering your experience with API but anyway, that's it. I have written an &lt;a href="https://deepjyoti30.github.io/blog/have-a-personal-page-for-free"&gt;article&lt;/a&gt; before on how to do that exactly. And &lt;a href="https://www.codementor.io/sagaragarwal94/building-a-basic-restful-api-in-python-58k02xsiq"&gt;here's&lt;/a&gt; the article I referred to build my API.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/frontend_backend.jpg" alt="My laptop" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://raw.githubusercontent.com/deepjyoti30/blog-static-content/master/content/frontend_backend.jpg" alt="My laptop" /&gt;&lt;/p&gt;
 
 &lt;p&gt;Once the API is ready and tests are done, it can be deployed very easily to Heroku. The process might differ depending on the languages. However for Python, all it takes is a Procfile where we need to add the command that will run once the app is pushed and that's that.&lt;/p&gt;
 
@@ -750,14 +932,14 @@ So a server lets us communicate with it and it and let's us make our page dynami
 
 &lt;p&gt;I decided to go with the Cherry MX blue ones. I don't play games and my keyboard is primaryly used for typing. My current linux setup is based on i3-gaps which makes me dependent on the keyboard a bit more than usual. I can pretty easily say that I use my trackpad/mouse only for scrolling and selecting things to copy. Otherwise I can use my setup completely without using a mouse.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/mx_blue.jpg" alt="" /&gt; Cherry MX Blue on my Akko 3068&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://raw.githubusercontent.com/deepjyoti30/blog-static-content/master/content/mx_blue.jpg" alt="" /&gt; Cherry MX Blue on my Akko 3068&lt;/p&gt;
 
 &lt;h2&gt;Deciding a size&lt;/h2&gt;
 
 &lt;p&gt;So the basic sizes that these keyboards come in are 65%, 60% and TKL. &lt;br /&gt;
 TKL just stands for Ten Key Less which means it has ten keys less than the usual full sized keyboards. 65% are 65% size of the full sized ones and 60% are 60% of the full sized. The most important difference between 65% and 60% is the inclusion of the dedicated arrow keys.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/tkl_kb.jpg" alt="" /&gt; &lt;a href="https://www.reddit.com/r/MechanicalKeyboards/comments/fjcra1/finished_my_mysterium_tkl_kit/"&gt;u/elevision on Reddit • TKL keyboard, custom build&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://raw.githubusercontent.com/deepjyoti30/blog-static-content/master/content/tkl_kb.jpg" alt="" /&gt; &lt;a href="https://www.reddit.com/r/MechanicalKeyboards/comments/fjcra1/finished_my_mysterium_tkl_kit/"&gt;u/elevision on Reddit • TKL keyboard, custom build&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;So I thought, I've used these full sized ones before and the smaller ones look kind of good. But I knew I couldn't live without those arrow keys since I use them on a daily basis, way too much, so I decided to go with the 65% ones.&lt;/p&gt;
 
@@ -769,7 +951,7 @@ TKL just stands for Ten Key Less which means it has ten keys less than the usual
 
 &lt;p&gt;So far it's pretty good. After I opened it up, it turned out to be smaller than I had expected but what can you expect from a 68 key keyboard. The keyboard is also pretty heavy, the parcel weighed 1.67 Kgs. The keys are pretty clicky.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/whole_kb.jpg" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://raw.githubusercontent.com/deepjyoti30/blog-static-content/master/content/whole_kb.jpg" alt="" /&gt;&lt;/p&gt;
 
 &lt;p&gt;I have to say the best thing is the sound of the keys, it's just so awesome typing on it. It feels like I'm using a typewriter. Really excited to use it at college where there'd be people around, LOL.&lt;/p&gt;
 
@@ -809,7 +991,7 @@ TKL just stands for Ten Key Less which means it has ten keys less than the usual
 
 &lt;p&gt;The only issue I have with this, which is also the reason I'm not using it currently is because it requires a server to deploy in. However, people like me, who don't have a dedicated server can't even go near using it. So yeah, it's a no go&lt;/p&gt;
 
-&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/isso_ss.jpg" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://raw.githubusercontent.com/deepjyoti30/blog-static-content/master/content/isso_ss.jpg" alt="" /&gt;&lt;/p&gt;
 
 &lt;h4&gt;Pros&lt;/h4&gt;
 
@@ -858,7 +1040,7 @@ TKL just stands for Ten Key Less which means it has ten keys less than the usual
 
 &lt;p&gt;So, they do have an option to comment anonymously but we need to sign in first and then comment. I think they just didn't think about those people who comment anonymously just because they don't want to sign into some strangers site and/or are laxy of doing that.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/wildfire-anonymous-issue.jpg" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://raw.githubusercontent.com/deepjyoti30/blog-static-content/master/content/wildfire-anonymous-issue.jpg" alt="" /&gt;&lt;/p&gt;
 
 &lt;h4&gt;Pros&lt;/h4&gt;
 
@@ -937,7 +1119,7 @@ TKL just stands for Ten Key Less which means it has ten keys less than the usual
 
 &lt;p&gt;Don't know what I'm talking about? Have you seen those pages that have those really cute looking human figures that indirectly convey the message. HINT: Look below.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/thinking.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://raw.githubusercontent.com/deepjyoti30/blog-static-content/master/content/thinking.png" alt="" /&gt;&lt;/p&gt;
 
 &lt;p&gt;Still thinking? These illustrations can be got from sites like &lt;a href="https://undraw.co"&gt;unDraw&lt;/a&gt; or &lt;a href="https://freepik.com"&gt;freepik&lt;/a&gt;. The ones available at unDraw are completely open source and they can even be downloaded with the color you like. freepik does give free images but with the condition that the author will be given credit wherever the image is used.&lt;/p&gt;
 
@@ -993,7 +1175,7 @@ TKL just stands for Ten Key Less which means it has ten keys less than the usual
 
 &lt;p&gt;However, progressbars are sometimes messy. If you've used pip more than just a couple of times, it is unavoidable to notice that the progressbar's size is predefined. What that means is, the bar doesn't resize depending on the width of the terminal, messing up the output a lot of times.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/bar.jpg" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://raw.githubusercontent.com/deepjyoti30/blog-static-content/master/content/bar.jpg" alt="" /&gt;&lt;/p&gt;
 
 &lt;p&gt;Though, pip's bar might not be responsive, pacman has a really neat bar that hardly screw's up. The length of the bar changes according to the width of the terminal.&lt;/p&gt;
 
@@ -1024,7 +1206,7 @@ TKL just stands for Ten Key Less which means it has ten keys less than the usual
 
 &lt;p&gt;The above code will print a bar of of 20 # after it's done.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/simple_bar.gif" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://raw.githubusercontent.com/deepjyoti30/blog-static-content/master/content/simple_bar.gif" alt="" /&gt;&lt;/p&gt;
 
 &lt;h2&gt;Making it responsive.&lt;/h2&gt;
 
@@ -1038,7 +1220,7 @@ TKL just stands for Ten Key Less which means it has ten keys less than the usual
 
 &lt;p&gt;So, if our bar is of 40 length, then in each percentage increase, the bar will be calculated using percent / (100/ 40) = percent / 2.5.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/responsive_bar.gif" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://raw.githubusercontent.com/deepjyoti30/blog-static-content/master/content/responsive_bar.gif" alt="" /&gt;&lt;/p&gt;
 
 &lt;p&gt;So that is how we can make a responsive progressbar for the commandline. In case you want to dive deeper and make your bar better, check my GitHub repo of a downloader where I'm using the same concept to create a progressbar. You can make it so much better, like adding colors, adding other stats regarding the progress like the speed, percentage etc.&lt;/p&gt;
 
@@ -1097,7 +1279,7 @@ TKL just stands for Ten Key Less which means it has ten keys less than the usual
 
 &lt;p&gt;That is it. We wrote a simple bot for BitBucket. Sit back and make a push to the repo that you enabled the webhook in. You will get a message on your Telegram.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/telegram_ss.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://raw.githubusercontent.com/deepjyoti30/blog-static-content/master/content/telegram_ss.png" alt="" /&gt;&lt;/p&gt;
 </description>
       <guid isPermaLink="false">https://blog.deepjyoti30.dev/how-i-wrote-a-telegram-bot-for-bitbucket</guid>
       <category>telegram</category>
@@ -1181,7 +1363,7 @@ TKL just stands for Ten Key Less which means it has ten keys less than the usual
 
 &lt;p&gt;Since then I have never looked back. Off late I have also developed an interest in customizing my laptop, software wise. This fascination started when I started using Ubuntu and came across a subreddit called &lt;a href="https://reddit.com/r/unixporn"&gt;unixporn&lt;/a&gt;. I now take great joy in customizing my setup. Do check it out &lt;a href="https://github.com/deepjyoti30/dotfiles"&gt;here&lt;/a&gt; and &lt;a href="https://github.com/deepjyoti30/dots"&gt;here&lt;/a&gt;.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/ytmdl.png" alt="ytmdl" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://raw.githubusercontent.com/deepjyoti30/blog-static-content/master/content/ytmdl.png" alt="ytmdl" /&gt;&lt;/p&gt;
 
 &lt;p&gt;I use a Dell laptop, the one in the cover of this article? Yeah, that's right. I have Manjaro i3 installed on it. I love using cli based applications. I try to do almost everything from the commandline. Why almost? Beacuse some things are, even though possible, just not possible (fun is the word) from the commandline. I mean, I just don't want to browse from the cli. I like appreciating &lt;em&gt;magical things&lt;/em&gt; that frontend developers do with their pages and thats just not possible from the cli.&lt;/p&gt;
 
@@ -1203,19 +1385,19 @@ TKL just stands for Ten Key Less which means it has ten keys less than the usual
       <link>https://blog.deepjyoti30.dev/github-and-people-who-steal</link>
       <description>&lt;p&gt;I have been using Github for a while now. If I have a project in mind, the first thing I do is make a new repo on github and then start with the project. It was around May (or June maybe) of 2018 when I had posted on Reddit about my project &lt;a href="https://github.com/deepjyoti30/ytmdl"&gt;ytmdl&lt;/a&gt; to check peoples response to it. That was when I came across &lt;a href="https://github.com/NISH1001/playx"&gt;playx&lt;/a&gt;. So &lt;a href="https://github.com/NISH1001"&gt;Nishan&lt;/a&gt; mentioned his project on the comments suggesting he had been working on something similar to my project. As I was, I opened the page and checked it. Turns out there were a lot of TODO's listed. I was free then, so I forked it and started working.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/reddit-comment.jpg" alt="Nishan's comment on my ytmdl post." /&gt; Nishan's comment on my post&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://raw.githubusercontent.com/deepjyoti30/blog-static-content/master/content/reddit-comment.jpg" alt="Nishan's comment on my ytmdl post." /&gt; Nishan's comment on my post&lt;/p&gt;
 
 &lt;p&gt;What started as a fun project quickly turned into an utility that I got adddicted to working on. I still remember making pull requests before sleeping every night at around 3 A.M. and every morning the first thing I'd check for is if the PR is approved or if Nishan has made any comments. I can say I enjoyed working on the project and a lot of it was because of Github. The simplicity of making PR's and getting them merged in the original code.&lt;/p&gt;
 
 &lt;p&gt;However, recently something happened that shook us both. We couldn't decide if we should laugh or get angry. Somebody stole our project. It was not a fork of the project, instead this person made a new repository and named it &lt;em&gt;layx&lt;/em&gt; which is &lt;em&gt;playx&lt;/em&gt; without a p. And the code, it was &lt;strong&gt;our&lt;/strong&gt; code. All I could think of was the late night PR's that I had made and how I have spent so much time working on it and it was all not mine anymore. On top of that, he didn't even care to change the README (that was offensive, he didn't care to fix the bugs.). The logo, it was the same logo that one developer has contributed to our project, just without a p. He even shared the project on Reddit and thats where Nishan came across it.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/layx.jpg" alt="" /&gt; layx posted on reddit&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://raw.githubusercontent.com/deepjyoti30/blog-static-content/master/content/layx.jpg" alt="" /&gt; layx posted on reddit&lt;/p&gt;
 
 &lt;p&gt;Yes I know we had a license but we felt helpless. Nishan opened a pull request asking this guy to take the repository down. He replied by closing it and saying it'll work differently to playx because it will take data from spotify (even I don't know why he thinks copying our code, making changes and branding it his, made sense). I asked Nishan if he has taken any action. He said he has contacted github but they said they can't help. He even tweeted. Later I opened a PR on this &lt;em&gt;layx&lt;/em&gt; repo and asked him to take it down or we would take legal action.&lt;/p&gt;
 
 &lt;p&gt;By this time, Nishan had already asked for a DMCA takedown of the project and the next day I got a mail from Nishan telling me that the guy deleted all our code from the repo and added java code there. Also, github had responded to tweets by Nishan by this time and later he had to tell them that it was settled.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src="https://blog-static-content.s3.ap-south-1.amazonaws.com/dec-PR.png" alt="" /&gt; Pull request of Dec 31&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://raw.githubusercontent.com/deepjyoti30/blog-static-content/master/content/dec-PR.png" alt="" /&gt; Pull request of Dec 31&lt;/p&gt;
 
 &lt;p&gt;Now here's what makes me scared. Even though I have licensed my projects, what if someday, some random guy copies all my code and brands it his. I know I have legal solutions to problems like this but what I don't understand is do I deserve this, do my time deserve being wasted like this? Just because some guy thought it would be funny or he didn't know the rules. What's even worse is I wouldn't even know if he's using my project would he not feel like sharing it on places like Reddit.&lt;/p&gt;
 
