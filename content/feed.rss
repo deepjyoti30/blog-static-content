@@ -13,7 +13,113 @@
       <link>https://blog.deepjyoti30.dev/feed</link>
     </image>
     <language>en</language>
-    <lastBuildDate>Mon, 14 Dec 2020 06:56:36 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 19 Dec 2020 13:27:10 +0000</lastBuildDate>
+    <item>
+      <title>Get all tables used in join from SQLAlchemy</title>
+      <link>https://blog.deepjyoti30.dev/get-all-tables-sqlalchemy-join</link>
+      <description>&lt;p&gt;Recently, I was working on one of my projects and I came across this issue of joining two tables. Now the thing is, I mostly stay away from using SQL and prefer to go with NoSQL databases, however this time, the requirement was to go with PostgreSQL so I ended up setting it up. Since the language I used for building backend services is Python (mostly &lt;code&gt;FastAPI&lt;/code&gt;), I went with &lt;code&gt;SQLAlchemy&lt;/code&gt; in order to connect to the database and get the proper data.&lt;/p&gt;
+
+&lt;p&gt;I actually think that it is a great library to connect to the database. I understand it's a bit of a hassle to set it up at the beginning but that set up actually helps a lot. Since, you set up a proper types etc for each column, it's easier to have proper type checking and avoid errors in the long run.&lt;/p&gt;
+
+&lt;p&gt;Anyway, to be honest, I am kind of liking using PostgreSQL and since it is &lt;code&gt;the&lt;/code&gt; language a lot of the Python developers use so I thought it will be worth trying it out. Now, I don't want to be hating on MySQL but honestly I feel like it is way too old school.&lt;/p&gt;
+
+&lt;h3&gt;The problem ?&lt;/h3&gt;
+
+&lt;p&gt;Well, my problem was I needed two tables. One would be a child table and the parent would keep a reference to the child. However, when I make a query I wanted to join the table and get an unified output.&lt;/p&gt;
+
+&lt;p&gt;So, I created the two tables in the following way.&lt;/p&gt;
+
+&lt;p&gt;Create the child table:&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;create&lt;/span&gt; &lt;span class="k"&gt;table&lt;/span&gt; &lt;span class="n"&gt;child&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cid&lt;/span&gt; &lt;span class="nb"&gt;serial&lt;/span&gt; &lt;span class="k"&gt;primary&lt;/span&gt; &lt;span class="k"&gt;key&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;child_name&lt;/span&gt; &lt;span class="nb"&gt;varchar&lt;/span&gt; &lt;span class="k"&gt;not&lt;/span&gt; &lt;span class="k"&gt;null&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Create the parent table:&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;create&lt;/span&gt; &lt;span class="k"&gt;table&lt;/span&gt; &lt;span class="n"&gt;parent&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;pid&lt;/span&gt; &lt;span class="nb"&gt;serial&lt;/span&gt; &lt;span class="k"&gt;primary&lt;/span&gt; &lt;span class="k"&gt;key&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;parent_name&lt;/span&gt; &lt;span class="nb"&gt;varchar&lt;/span&gt; &lt;span class="k"&gt;not&lt;/span&gt; &lt;span class="k"&gt;null&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;child&lt;/span&gt; &lt;span class="nb"&gt;serial&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Once both the tables are created, I added a reference to the child id in the child column for the parent table.&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;alter&lt;/span&gt; &lt;span class="k"&gt;table&lt;/span&gt; &lt;span class="n"&gt;parent&lt;/span&gt; &lt;span class="k"&gt;add&lt;/span&gt; &lt;span class="k"&gt;foreign&lt;/span&gt; &lt;span class="k"&gt;key&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;child&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;references&lt;/span&gt; &lt;span class="n"&gt;child&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cid&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h4&gt;Fetching using a join&lt;/h4&gt;
+
+&lt;p&gt;Now, let's enter some sample data in the tables and try to fetch them the way we want it.&lt;/p&gt;
+
+&lt;p&gt;After entering the data, the tables looked like this&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;test&lt;/span&gt;&lt;span class="o"&gt;=#&lt;/span&gt; &lt;span class="k"&gt;select&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="k"&gt;from&lt;/span&gt; &lt;span class="n"&gt;parent&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+ &lt;span class="n"&gt;pid&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;parent_name&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;child&lt;/span&gt; 
+&lt;span class="c1"&gt;-----+-------------+-------&lt;/span&gt;
+   &lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;Test&lt;/span&gt; &lt;span class="n"&gt;Parent&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt;     &lt;span class="mi"&gt;2&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="k"&gt;row&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;test&lt;/span&gt;&lt;span class="o"&gt;=#&lt;/span&gt; &lt;span class="k"&gt;select&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="k"&gt;from&lt;/span&gt; &lt;span class="n"&gt;child&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+ &lt;span class="n"&gt;cid&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;child_name&lt;/span&gt; 
+&lt;span class="c1"&gt;-----+------------&lt;/span&gt;
+   &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;Test&lt;/span&gt; &lt;span class="n"&gt;Child&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="k"&gt;row&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Now, as seen above, the parent with id &lt;code&gt;1&lt;/code&gt; is referencing a child with id &lt;code&gt;2&lt;/code&gt;. If we want to fetch both the above data together, we would do a join. For example, the tables can be joined in the following way.&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;test&lt;/span&gt;&lt;span class="o"&gt;=#&lt;/span&gt; &lt;span class="k"&gt;select&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="k"&gt;from&lt;/span&gt; &lt;span class="n"&gt;parent&lt;/span&gt; &lt;span class="k"&gt;left&lt;/span&gt; &lt;span class="k"&gt;join&lt;/span&gt; &lt;span class="n"&gt;child&lt;/span&gt; &lt;span class="k"&gt;on&lt;/span&gt; &lt;span class="n"&gt;parent&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;child&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;child&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cid&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+ &lt;span class="n"&gt;pid&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;parent_name&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;child&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;cid&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;child_name&lt;/span&gt; 
+&lt;span class="c1"&gt;-----+-------------+-------+-----+------------&lt;/span&gt;
+   &lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;Test&lt;/span&gt; &lt;span class="n"&gt;Parent&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt;     &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt;   &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;Test&lt;/span&gt; &lt;span class="n"&gt;Child&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="k"&gt;row&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;When we join the tables using a left join on the child id, we get the above output, which is just perfect. However, this is just the command on the SQL console. We need to do the same command in SQLAlchemy and get the same data so that it will be easier for us.&lt;/p&gt;
+
+&lt;h4&gt;Joining two tables in SQLAlchemy&lt;/h4&gt;
+
+&lt;p&gt;I tried joining the tables as pointed by a lot of &lt;a href="https://stackoverflow.com/questions/50617343/how-to-join-data-from-two-tables-in-sqlalchemy"&gt;StackOverflow&lt;/a&gt; answers. However, that just didn't work.&lt;/p&gt;
+
+&lt;p&gt;Now the answer basically says that we can do a join like in the following way:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Assuming you created a Session object from SQLAlchemy which would be named as &lt;code&gt;db&lt;/code&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;db&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;query&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Parent&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Child&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;Parent&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;child&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;Child&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cid&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Anyone with a basic understanding of Python would think that the above result would return a Parent object with the Child attributes included since that is what we understand from the table outputs that SQL provides us.&lt;/p&gt;
+
+&lt;p&gt;Like, if we run a basic join command, like in the above part, we get one table with both the child and the parent rows included.&lt;/p&gt;
+
+&lt;p&gt;However, this is not the case in &lt;code&gt;SQLAlchemy&lt;/code&gt;. They actually work a bit different.&lt;/p&gt;
+
+&lt;h4&gt;How and Why does SQLAlchemy do that?&lt;/h4&gt;
+
+&lt;p&gt;So, in SQLAlchemy, when the above statement is run, it returns a &lt;code&gt;Parent&lt;/code&gt; object with just the parent attributes. Now, I was expecting that they would provide us an object with both the attributes from &lt;code&gt;Parent&lt;/code&gt; and &lt;code&gt;Child&lt;/code&gt; but they didn't.&lt;/p&gt;
+
+&lt;p&gt;Here's a logical solution as to why they do not do that. If we want an object with both the parent and child attributes, that would mean we would get an object of a Class that has both the &lt;code&gt;Parent&lt;/code&gt; class and the &lt;code&gt;Child&lt;/code&gt; class. In other words, if we do a join in &lt;code&gt;SQLAlchemy&lt;/code&gt;, they would have to create a new &lt;code&gt;Class&lt;/code&gt; that would inherit from all the table classes that are present in the join.&lt;/p&gt;
+
+&lt;p&gt;This behaviour, even though, it would make developers lives easier, would be pretty inefficient. Creating classes on the fly like that (as far as I understand) would be a total mess and would not be an optimized solution for a library that is used by so many people.&lt;/p&gt;
+
+&lt;h3&gt;The Solution&lt;/h3&gt;
+
+&lt;p&gt;What is the solution you may ask. Well, it's not that difficult. Since, we understand the problem now which is that &lt;code&gt;SQLAlchemy&lt;/code&gt; cannot just create dynamic classes with columns from more than one table, why don't we pass it the tables we want it to work on? That way it will return us all the tables we need and run a proper join on them as well.&lt;/p&gt;
+
+&lt;p&gt;So, in our situation, we need two tables from &lt;code&gt;SQLAlchemy&lt;/code&gt;, one being the &lt;code&gt;Parent&lt;/code&gt; table and the other the &lt;code&gt;child&lt;/code&gt; table. So we can do something like the following:&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;parent&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;child&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;db&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;query&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Parent&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;Child&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="k"&gt;join&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Child&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;Parent&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;child&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;Child&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cid&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The above statement returns two objects, one is a &lt;code&gt;Parent&lt;/code&gt; object with all the parent columns and the second a &lt;code&gt;Child&lt;/code&gt; object with all the child details. Thus we have all the data that we needed and we can just do whatever we want with this data now.&lt;/p&gt;
+</description>
+      <guid isPermaLink="false">https://blog.deepjyoti30.dev/get-all-tables-sqlalchemy-join</guid>
+      <category>all</category>
+      <category>tables</category>
+      <category>sqlalchemy</category>
+      <category>python</category>
+      <pubDate>Sat, 19 Dec 2020 13:27:10 +0000</pubDate>
+    </item>
     <item>
       <title>Happiness status of your GitHub repo: repostatus</title>
       <link>https://blog.deepjyoti30.dev/repostatus-how</link>
@@ -24,7 +130,7 @@
       <category>javascript</category>
       <category>python</category>
       <category>opensource</category>
-      <pubDate>Mon, 14 Dec 2020 06:56:36 +0000</pubDate>
+      <pubDate>Wed, 09 Dec 2020 14:21:23 +0000</pubDate>
     </item>
     <item>
       <title>Add tab autocomplete for your commandline apps</title>
