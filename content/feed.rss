@@ -13,7 +13,149 @@
       <link>https://blog.deepjyoti30.dev/feed</link>
     </image>
     <language>en</language>
-    <lastBuildDate>Sat, 19 Dec 2020 13:27:10 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 04 Jan 2021 14:46:05 +0000</lastBuildDate>
+    <item>
+      <title>Python has a built in search function. Here's how to use it</title>
+      <link>https://blog.deepjyoti30.dev/pythons-builtin-search-function</link>
+      <description>&lt;p&gt;I was going through the Python docs and guess what I came across? A function that helps you get closest matches to a list of other strings. Now why would that function be useful, you'd ask. Let me give you a proper example.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;TL;DR: Python has a built in function &lt;code&gt;get_close_matches&lt;/code&gt; that computes &lt;a href="https://en.wikipedia.org/wiki/Jaccard_index"&gt;jaccard&lt;/a&gt; in order to determine if two strings are similar and accordingly finds the closest matches.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3&gt;The problem&lt;/h3&gt;
+
+&lt;p&gt;About 1 and a half years ago, I was working on &lt;a href="https://github.com/NISH1001/playx"&gt;playx&lt;/a&gt;. It is a tool that lets you stream music from the commandline directly from YouTube. While working on it, we decided that adding a feature to cache the files would be pretty nice. Now, while implementing that, we came across a problem. We needed to check if a song is already cached.&lt;/p&gt;
+
+&lt;p&gt;Now, the issue is, on YouTube, one song is uploaded by various channels which means the titles vary and since we were caching the songs using the title of the video from YouTube, that meant that if we did a direct match of the titles, it would be a very inefficient way to check if the song has been cached already.&lt;/p&gt;
+
+&lt;p&gt;For example, if we have the song name &lt;code&gt;Sundown&lt;/code&gt;. This song might have been saved as &lt;code&gt;Sundown - Gordon Lightfoot&lt;/code&gt;. However, the next time user tries to play the same song which had a different title, something like &lt;code&gt;Sundown - Lyrics only | Gordon Lightfoot&lt;/code&gt;. In  this case, a simple match would indicate that both songs are different and the tool would end up caching both even though the songs are same.&lt;/p&gt;
+
+&lt;p&gt;If you got an idea of the problem from reading the above, I think you would agree with me that it is similar to searching a particular file in a list of files.&lt;/p&gt;
+
+&lt;h4&gt;Solving the above problem the hard way&lt;/h4&gt;
+
+&lt;p&gt;At that point, &lt;a href="https://github.com/NISH1001"&gt;Nishan&lt;/a&gt; came up with a nice solution to find songs that are similar to each other and not cache them.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;TL;DR: Compute jaccard for the song name passed by the user and the list of files we have which will give us a relative idea of how similar a song is to the other based on the title.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;First things first, if we look at the two title &lt;code&gt;Sundown&lt;/code&gt; and &lt;code&gt;Sundown - Gordon Lightfoot&lt;/code&gt;, we would think that the titles might mean it's the same song (to some extent). So how do we check that using our code?&lt;/p&gt;
+
+&lt;p&gt;One solution to do that is to compute jaccard between the two titles.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href="https://en.wikipedia.org/wiki/Jaccard_index"&gt;Jaccard Coefficient&lt;/a&gt; is a coefficient that is calculated between two similar entitites and it indicates how similar the two entities are. It is a &lt;code&gt;naive&lt;/code&gt; way to find it, but atleast, it works better than direct matching.&lt;/p&gt;
+
+&lt;p&gt;So how do we compute the jaccard between two strings? From the wiki definition, jaccard is the ratio of all the similar properties of the two entities upon all the possible properties of the two entities. That means, it would be a ratio of all the similar characters in the two strings upon all the unique characters in the two strings.&lt;/p&gt;
+
+&lt;p&gt;How do we find that by code?&lt;/p&gt;
+
+&lt;p&gt;We can just split the two strings into sets. We can then, find the ratio of the sets intersection upon the sets union.&lt;/p&gt;
+
+&lt;p&gt;Following code does exactly that&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;compute_jaccard&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;first_string&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;second_string&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+   &lt;span class="n"&gt;first_str_chars&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;set&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;first_string&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+   &lt;span class="n"&gt;second_str_chars&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;set&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;second_string&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+
+   &lt;span class="n"&gt;similarity&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;first_str_chars&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;intersection&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;second_str_chars&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+   &lt;span class="n"&gt;all_unique_chars&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;first_str_chars&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;union&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;second_str_chars&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+   &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;similarity&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;all_unique_chars&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The above code has a function that accepts two strings. It splits the two strings based on space into sets. The sets are then intersected and union'ed. Finally the jaccard is computed by counting the number of similar words to the number of total unique words.&lt;/p&gt;
+
+&lt;p&gt;Once we have the &lt;code&gt;jaccard_coefficient&lt;/code&gt;, we can just keep a minimum amount that the jaccard should be which would indicate how similar the two string would be.&lt;/p&gt;
+
+&lt;p&gt;For example, if we have a jaccard coefficient of 0.75, it means the two strings are 75% (0.75 * 100) similar.&lt;/p&gt;
+
+&lt;h4&gt;In a search algorithm&lt;/h4&gt;
+
+&lt;p&gt;We can use the above logic to sort a list of results based on the jaccard coefficient computed and accordingly find the most similar files based on their names.&lt;/p&gt;
+
+&lt;h3&gt;Python's built in solution&lt;/h3&gt;
+
+&lt;p&gt;Python has a built in function in the &lt;code&gt;difflib&lt;/code&gt; package named as &lt;code&gt;get_close_matches&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;It takes four arguments in the following order:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;word&lt;/code&gt;: The string which we are searching for&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;possibilites&lt;/code&gt;: The list of strings we are searching it in&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;n&lt;/code&gt;: Indicates how many results to return based on the search. By default it is set to &lt;code&gt;3&lt;/code&gt;. Can be a positive integer.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;cutoff&lt;/code&gt;: An float between 0 and 1 which will effectively how similar the two strings should be. By default set to &lt;code&gt;0.6&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;If you look at the above parameters are bit carefully, you'll see that the &lt;code&gt;cutoff&lt;/code&gt; might be effectively the value of the jaccard coefficient that will indicate how similar the two strings are.&lt;/p&gt;
+
+&lt;p&gt;Let's get back to our initial problem. We want to see if a song similar to that entered by the user is already cached.&lt;/p&gt;
+
+&lt;p&gt;So, if we have a list of already cached files and we have the name of the song user entered, we can find if that song exists in the following way:&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;difflib&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;get_close_matches&lt;/span&gt;
+
+&lt;span class="n"&gt;song_user_entered&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Sundown&amp;quot;&lt;/span&gt;
+
+&lt;span class="n"&gt;cached_songs&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+   &lt;span class="s2"&gt;&amp;quot;Sundown Gordon Lightfoot&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+   &lt;span class="s2"&gt;&amp;quot;Sundown lyrics gordon lightfoot&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+   &lt;span class="s2"&gt;&amp;quot;sundown hd audio gordon&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+   &lt;span class="s2"&gt;&amp;quot;some other song&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+   &lt;span class="s2"&gt;&amp;quot;couchiching gordon lightfoot&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+   &lt;span class="s2"&gt;&amp;quot;never gonna give you up&amp;quot;&lt;/span&gt;
+&lt;span class="p"&gt;]&lt;/span&gt;
+
+&lt;span class="n"&gt;results&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;get_close_matches&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;song_user_entered&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;cached_songs&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="c1"&gt;# results is an emtpy list&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The above code runs all right but we get an empty list. This is because the &lt;code&gt;cutoff&lt;/code&gt; parameter (how similar the strings are) is set to &lt;code&gt;0.6&lt;/code&gt; by default and none of the strings pass that number if you try checking that.&lt;/p&gt;
+
+&lt;p&gt;Instead, if we lower the cutoff in the following way:&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;results&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;get_close_matches&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;song_user_entered&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;cached_songs&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                            &lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;cutoff&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mf"&gt;0.3&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="c1"&gt;# results is [&amp;#39;Sundown Gordon Lightfoot&amp;#39;]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;The &lt;code&gt;cutoff&lt;/code&gt; parameter is the value of jaccard which the function uses to filter out the results.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Thus, now, we know that one of the results was similar.&lt;/p&gt;
+
+&lt;h3&gt;Verifying if Jaccard is computed&lt;/h3&gt;
+
+&lt;p&gt;Just for fun, let's see if actually, jaccard is being calculated by the &lt;code&gt;get_close_matched&lt;/code&gt; function.&lt;/p&gt;
+
+&lt;p&gt;First, we will compute the jaccard ourselves using our &lt;code&gt;compute_jaccard&lt;/code&gt; function and then we will see if the results match.&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;song&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;cached_songs&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+   &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;song&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;compute_jaccard&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;song&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;song_user_entered&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Above gives us the following output:&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="go"&gt;Sundown Gordon Lightfoot 0.3333333333333333&lt;/span&gt;
+&lt;span class="go"&gt;Sundown lyrics gordon lightfoot 0.25&lt;/span&gt;
+&lt;span class="go"&gt;sundown hd audio gordon 0.0&lt;/span&gt;
+&lt;span class="go"&gt;some other song 0.0&lt;/span&gt;
+&lt;span class="go"&gt;couchiching gordon lightfoot 0.0&lt;/span&gt;
+&lt;span class="go"&gt;never gonna give you up 0.0&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Which justifies the result that only the first string is returned by the &lt;code&gt;get_close_matches&lt;/code&gt; function. Thus, we know that the function uses &lt;code&gt;jaccard&lt;/code&gt; to determine similarity.&lt;/p&gt;
+</description>
+      <guid isPermaLink="false">https://blog.deepjyoti30.dev/pythons-builtin-search-function</guid>
+      <category>python</category>
+      <category>search</category>
+      <category>function</category>
+      <category>builtin</category>
+      <pubDate>Mon, 04 Jan 2021 14:46:05 +0000</pubDate>
+    </item>
     <item>
       <title>Get all tables used in join from SQLAlchemy</title>
       <link>https://blog.deepjyoti30.dev/get-all-tables-sqlalchemy-join</link>
