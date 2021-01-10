@@ -13,10 +13,10 @@
       <link>https://blog.deepjyoti30.dev/feed</link>
     </image>
     <language>en</language>
-    <lastBuildDate>Sat, 09 Jan 2021 15:55:40 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 10 Jan 2021 06:43:42 +0000</lastBuildDate>
     <item>
       <title>Cache dynamic pages for better performance</title>
-      <link>https://blog.deepjyoti30.dev/cache-dynamical-pages</link>
+      <link>https://blog.deepjyoti30.dev/cache-dynamic-pages</link>
       <description>&lt;p&gt;So you built a personal blog that loads the content when the user opens the page? In other words, you built a page that loads the content dynamically using an API which instead, actually stores the content of the post? Even I did that. My page, the one you're reading this post on, loads the post content and everything else using an API which handles everything.&lt;/p&gt;
 
 &lt;h3&gt;Problem with dynamic loading&lt;/h3&gt;
@@ -51,7 +51,7 @@
 
 &lt;p&gt;Well, if you're feeling really ambitious, perhaps you can add a feature to show a button when the cache is detected to be outdated? That way once the cache is synced in the background and updated, the user will just see a button, clicking which will just refresh the page (or perhpas just re-render the content) and the overall experience will be way more fluid.&lt;/p&gt;
 </description>
-      <guid isPermaLink="false">https://blog.deepjyoti30.dev/cache-dynamical-pages</guid>
+      <guid isPermaLink="false">https://blog.deepjyoti30.dev/cache-dynamic-pages</guid>
       <category>cache</category>
       <category>dynamic</category>
       <category>pages</category>
