@@ -13,11 +13,15 @@
       <link>https://blog.deepjyoti30.dev/feed</link>
     </image>
     <language>en</language>
-    <lastBuildDate>Sun, 10 Jan 2021 06:43:42 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 10 Jan 2021 06:53:08 +0000</lastBuildDate>
     <item>
       <title>Cache dynamic pages for better performance</title>
       <link>https://blog.deepjyoti30.dev/cache-dynamic-pages</link>
-      <description>&lt;p&gt;So you built a personal blog that loads the content when the user opens the page? In other words, you built a page that loads the content dynamically using an API which instead, actually stores the content of the post? Even I did that. My page, the one you're reading this post on, loads the post content and everything else using an API which handles everything.&lt;/p&gt;
+      <description>&lt;blockquote&gt;
+  &lt;p&gt;UPDATE: Now you can see the refresh button in action. Just go to the &lt;a href="https://blog.deepjyoti30.dev"&gt;home page&lt;/a&gt; and it should show up. It will show up only when the background sync determines that some posts have changed in the upstream and the cached data is outdated.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;So you built a personal blog that loads the content when the user opens the page? In other words, you built a page that loads the content dynamically using an API which instead, actually stores the content of the post? Even I did that. My page, the one you're reading this post on, loads the post content and everything else using an API which handles everything.&lt;/p&gt;
 
 &lt;h3&gt;Problem with dynamic loading&lt;/h3&gt;
 
