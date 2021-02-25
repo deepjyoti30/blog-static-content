@@ -13,7 +13,102 @@
       <link>https://blog.deepjyoti30.dev/feed</link>
     </image>
     <language>en</language>
-    <lastBuildDate>Sun, 10 Jan 2021 06:53:08 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 25 Feb 2021 16:35:46 +0000</lastBuildDate>
+    <item>
+      <title>Ytmdl Web v2 is finally here. Here's what has changed!</title>
+      <link>https://blog.deepjyoti30.dev/ytmdl-v2-release</link>
+      <description>&lt;p&gt;So it's been in works since a while now. Yep. Ytmdl Web's V2. This time it is even better! Since the first version was released, it did get a lot of traffic but it was far from perfect so I felt like I owed it to the users to give them a new, better, aweseome version that would work flawlessly.&lt;/p&gt;
+
+&lt;p&gt;So here it is. &lt;strong&gt;Ytmdl Web V2&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;h2&gt;Features&lt;/h2&gt;
+
+&lt;p&gt;So this version &lt;strong&gt;does&lt;/strong&gt; come with a lot of changes and a lot of new features. Most importantly, this version is built from the ground up and it is not just a few changes on top of the older version, you can totally expect something way better. &lt;a href="https://ytmdl.deepjyoti30.dev"&gt;Go check it out&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Some of the new features are:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Way Faster (It's a proper PWA now so that means improved performance)&lt;/li&gt;
+&lt;li&gt;Better Downloads&lt;/li&gt;
+&lt;li&gt;User Settings&lt;/li&gt;
+&lt;li&gt;Manual Metadata&lt;/li&gt;
+&lt;li&gt;URL Support&lt;/li&gt;
+&lt;li&gt;Open Source (yep, not a feature, but it is!!)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3&gt;Way Faster&lt;/h3&gt;
+
+&lt;p&gt;The previous version was just a badly built webapp that wasn't optimized in many ways and it took ages to load. I have to admit, I was just a newbie getting started with Vue when I built that app and I am not going to call it one of the better apps I built. I agree, the functionality was good, it worked all right, but it was not perfect. You can see that for yourself in the following Lighthouse score of the older version.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="https://raw.githubusercontent.com/deepjyoti30/blog-static-content/master/content/ytmdlweb-v1-score.png" alt="YtmdlWeb V1 Lighthouse Score" /&gt;
+&lt;em&gt;Ytmdl Web v1 lighthouse score&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;I know, Lighthouse score doesn't mean everything but it does indicate some of the important things that were skipped in the first iteration of the app.&lt;/p&gt;
+
+&lt;p&gt;To fix those things, I finally built the second iteration from scratch. Keeping in mind everything. Most important change on this version is I have added &lt;a href=""&gt;workbox&lt;/a&gt;. This means the app will be a proper Progressive Web App now and will load way faster since a lot of files will be cached once the first load is done.&lt;/p&gt;
+
+&lt;p&gt;Also the code is improved a lot which compressed the overall app size to &lt;em&gt;*&lt;/em&gt;*. This is important since devices with slow important might not be able to download large content at once.&lt;/p&gt;
+
+&lt;p&gt;Anyway, check the lighthouse score of the newer version below. It is &lt;em&gt;almost&lt;/em&gt; perfect.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="https://raw.githubusercontent.com/deepjyoti30/blog-static-content/master/content/ytmdlweb-v2-score.png" alt="Ytmdlweb V2 Lighthouse Score" /&gt;
+&lt;em&gt;Ytmdl Web v2 lighthouse score&lt;/em&gt;&lt;/p&gt;
+
+&lt;h3&gt;Better Downloads&lt;/h3&gt;
+
+&lt;p&gt;Not just the app, the backend is also redone this time. I will probably write a separate post about that later.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;TL;DR: The backend is now rewritten using FastAPI and works way better.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;This time, the backend is written in FastAPI and yeah, it is better in a lot of ways. However, one of the most important changes in this version of the API is that downloading the song is now done after the user has selected both the song and metadata.&lt;/p&gt;
+
+&lt;p&gt;In the previous version, following was the flow:&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nx"&gt;Select&lt;/span&gt; &lt;span class="nx"&gt;Song&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nx"&gt;Downloaded&lt;/span&gt; &lt;span class="nx"&gt;song&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nx"&gt;Selecte&lt;/span&gt; &lt;span class="nx"&gt;metadata&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nx"&gt;Add&lt;/span&gt; &lt;span class="nx"&gt;metadata&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nx"&gt;Let&lt;/span&gt; &lt;span class="nx"&gt;user&lt;/span&gt; &lt;span class="nx"&gt;download&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;In this version, the flow is refactored to the following:&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nx"&gt;Select&lt;/span&gt; &lt;span class="nx"&gt;Song&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nx"&gt;Select&lt;/span&gt; &lt;span class="nx"&gt;metadata&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nx"&gt;Download&lt;/span&gt; &lt;span class="nx"&gt;song&lt;/span&gt; &lt;span class="nx"&gt;and&lt;/span&gt; &lt;span class="nx"&gt;Add&lt;/span&gt; &lt;span class="nx"&gt;metadata&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nx"&gt;Let&lt;/span&gt; &lt;span class="nx"&gt;user&lt;/span&gt; &lt;span class="nx"&gt;download&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This might not seem like a lot of improvement, but it is. In the previous version, we had to know which file the API was working since the first request which added a lot of overhead. That restriction is now gone with this release.&lt;/p&gt;
+
+&lt;h3&gt;User Settings&lt;/h3&gt;
+
+&lt;p&gt;On this version, user settings are introduced. There are settings like default song format. So if you select one format and keep it default, you wouldn't be asked to select it everytime. When I was building the app, I wanted to make sure that the user has the best experience possible and so User Settings were an important part of it.&lt;/p&gt;
+
+&lt;p&gt;You can check user settings by going to the &lt;code&gt;/settings&lt;/code&gt; route in the webapp.&lt;/p&gt;
+
+&lt;h3&gt;Manual Metadata&lt;/h3&gt;
+
+&lt;p&gt;Yes. The CLI version has it so I thought the web version totally needed that feature, so here it is. Based on the various user reports in the CLI app, it seemed like this would be a necessary feature because no matter how many meta sources we add, there's always that one song from an Indie singer that doesn't exist in any servers. In cases like that people can now opt for manually inserting the metadata and downloading the song.&lt;/p&gt;
+
+&lt;h3&gt;URL Support&lt;/h3&gt;
+
+&lt;p&gt;Since the CLI version supported it, the web version needed to add support for &lt;strong&gt;Youtube URL's&lt;/strong&gt;, so here it is. Instead of entering a song name, you can just enter a valid YouTube URL and Ytmdl will automatically take you to the next page of selecting metadata. It's not much but it might come very handy at times.&lt;/p&gt;
+
+&lt;h3&gt;Other Changes&lt;/h3&gt;
+
+&lt;h4&gt;Addition of OPUS&lt;/h4&gt;
+
+&lt;p&gt;Not just the above, there are a lot of under the hood, quality of life patches. One of those is addition of &lt;strong&gt;OPUS&lt;/strong&gt; as a song format. The previous version just supported &lt;em&gt;m4a&lt;/em&gt; and &lt;em&gt;mp3&lt;/em&gt; so this version adds one to the list.&lt;/p&gt;
+
+&lt;h4&gt;Open Source&lt;/h4&gt;
+
+&lt;p&gt;If you're a part of the Telegram Channel, you'd know that a lot of users keep asking if the Web version is open source so I gave it some thought and finally decided to make this version open source. Not just that, this version comes with container images that can be deployed right away so that you have the freedom of using a self hosted version. You can find the &lt;a href="https://github.com/deepjyoti30/ytmdl-web-v2"&gt;source here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;I am really excited to finally be able to release this version, especially considering the response that I got with the first version of the app. Also, if you feel like there are some settings that might be a nice addition to the current app, feel free to raise an issue on GitHub.&lt;/p&gt;
+</description>
+      <guid isPermaLink="false">https://blog.deepjyoti30.dev/ytmdl-v2-release</guid>
+      <category>ytmdl</category>
+      <category>webapp</category>
+      <category>vue</category>
+      <category>python</category>
+      <pubDate>Thu, 25 Feb 2021 16:35:46 +0000</pubDate>
+    </item>
     <item>
       <title>Cache dynamic pages for better performance</title>
       <link>https://blog.deepjyoti30.dev/cache-dynamic-pages</link>
