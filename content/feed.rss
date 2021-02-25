@@ -13,7 +13,7 @@
       <link>https://blog.deepjyoti30.dev/feed</link>
     </image>
     <language>en</language>
-    <lastBuildDate>Thu, 25 Feb 2021 16:35:46 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 25 Feb 2021 16:46:04 +0000</lastBuildDate>
     <item>
       <title>Ytmdl Web v2 is finally here. Here's what has changed!</title>
       <link>https://blog.deepjyoti30.dev/ytmdl-v2-release</link>
@@ -45,9 +45,9 @@
 
 &lt;p&gt;I know, Lighthouse score doesn't mean everything but it does indicate some of the important things that were skipped in the first iteration of the app.&lt;/p&gt;
 
-&lt;p&gt;To fix those things, I finally built the second iteration from scratch. Keeping in mind everything. Most important change on this version is I have added &lt;a href=""&gt;workbox&lt;/a&gt;. This means the app will be a proper Progressive Web App now and will load way faster since a lot of files will be cached once the first load is done.&lt;/p&gt;
+&lt;p&gt;To fix those things, I finally built the second iteration from scratch. Keeping in mind everything. Most important change on this version is I have added &lt;a href="https://developers.google.com/web/tools/workbox"&gt;workbox&lt;/a&gt;. This means the app will be a proper Progressive Web App now and will load way faster since a lot of files will be cached once the first load is done.&lt;/p&gt;
 
-&lt;p&gt;Also the code is improved a lot which compressed the overall app size to &lt;em&gt;*&lt;/em&gt;*. This is important since devices with slow important might not be able to download large content at once.&lt;/p&gt;
+&lt;p&gt;Also the code is improved a lot which compressed the overall app size to &lt;strong&gt;145KiB Gzipped&lt;/strong&gt;. This is important since devices with slow important might not be able to download large content at once.&lt;/p&gt;
 
 &lt;p&gt;Anyway, check the lighthouse score of the newer version below. It is &lt;em&gt;almost&lt;/em&gt; perfect.&lt;/p&gt;
 
@@ -92,9 +92,9 @@
 
 &lt;h3&gt;Other Changes&lt;/h3&gt;
 
-&lt;h4&gt;Addition of OPUS&lt;/h4&gt;
+&lt;h4&gt;Addition of Opus&lt;/h4&gt;
 
-&lt;p&gt;Not just the above, there are a lot of under the hood, quality of life patches. One of those is addition of &lt;strong&gt;OPUS&lt;/strong&gt; as a song format. The previous version just supported &lt;em&gt;m4a&lt;/em&gt; and &lt;em&gt;mp3&lt;/em&gt; so this version adds one to the list.&lt;/p&gt;
+&lt;p&gt;Not just the above, there are a lot of under the hood, quality of life patches. One of those is addition of &lt;strong&gt;Opus&lt;/strong&gt; as a song format. The previous version just supported &lt;strong&gt;m4a&lt;/strong&gt; and &lt;strong&gt;mp3&lt;/strong&gt; so this version adds one to the list.&lt;/p&gt;
 
 &lt;h4&gt;Open Source&lt;/h4&gt;
 
