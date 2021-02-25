@@ -13,7 +13,55 @@
       <link>https://blog.deepjyoti30.dev/feed</link>
     </image>
     <language>en</language>
-    <lastBuildDate>Mon, 04 Jan 2021 14:46:05 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 10 Jan 2021 06:53:08 +0000</lastBuildDate>
+    <item>
+      <title>Cache dynamic pages for better performance</title>
+      <link>https://blog.deepjyoti30.dev/cache-dynamic-pages</link>
+      <description>&lt;blockquote&gt;
+  &lt;p&gt;UPDATE: Now you can see the refresh button in action. Just go to the &lt;a href="https://blog.deepjyoti30.dev"&gt;home page&lt;/a&gt; and it should show up. It will show up only when the background sync determines that some posts have changed in the upstream and the cached data is outdated.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;So you built a personal blog that loads the content when the user opens the page? In other words, you built a page that loads the content dynamically using an API which instead, actually stores the content of the post? Even I did that. My page, the one you're reading this post on, loads the post content and everything else using an API which handles everything.&lt;/p&gt;
+
+&lt;h3&gt;Problem with dynamic loading&lt;/h3&gt;
+
+&lt;p&gt;As much as it is convinient, it also creates an issue with performance. Let's take an example. My &lt;a href="https://blog.deepjyoti30.dev"&gt;blog's homepage&lt;/a&gt; loads the latest posts dynamically after the page is loaded. This means that, everytime an user opens the page, it will make a request to the API and fetch the latest blog posts.&lt;/p&gt;
+
+&lt;p&gt;This, even though, is not much of an issue in terms of bandwidth, it is an issue in terms of speed. Just in case, your internet connection is slow or for some reason my API decides to die, the posts will not load and all an end user will be able to see is an infinite loading animation.&lt;/p&gt;
+
+&lt;p&gt;So, how do we make the user feel like they don't have to wait? &lt;strong&gt;Cache&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;h3&gt;Cache your content&lt;/h3&gt;
+
+&lt;p&gt;The content that you're loading, you can just cache it and store it in the browsers localstorage. That is a simple enough fix. When the page loads, check if there's a cache and if it is there, just show it to the user.&lt;/p&gt;
+
+&lt;p&gt;If there is not cache then fetch the content and store in the cache so from the next time it can be fetched easily. Once the caching is done, you can just set an expiry for the cache and accordingly refresh it after it has expired.&lt;/p&gt;
+
+&lt;h3&gt;Problem with caching&lt;/h3&gt;
+
+&lt;p&gt;There is one issue with caching though. Let's say an user visited my blog 10:30 in the morning and the posts that the user fetches at that moment are cached. Let's say the posts are cached for 2 hours. So if this user visits the same page in the next two hours, they'll be able to see the cached version of the page. However, let's say at 11:15 I push a new blog. So that means, this user will not be able to see this post until and unless they visit the page after 12:30.&lt;/p&gt;
+
+&lt;p&gt;This is troublesome and not the desired outcome. So how do we fix it?&lt;/p&gt;
+
+&lt;h4&gt;Sync cache in the background&lt;/h4&gt;
+
+&lt;p&gt;So let's say we have the cached posts now and when the user visits next, they see this cached content. So once we show this posts to the user, we can just run a background process that will fetch the latest posts from the API. It will then check if the posts cached locally are different from the cached returned by the API and if that is the case, it will update the cache in the background.&lt;/p&gt;
+
+&lt;p&gt;Once that is done, the next time the page loads, the user will see the latest post. This is highly effective to keep the page performant as well as keep the latest posts fetched at the same time. In terms of bandwidth, I don't think it is a major issue since an API call will bearly take a few Kilobytes which is nothing as compared to those large fontawesome css files ;-/.&lt;/p&gt;
+
+&lt;p&gt;Taking the above example again, the user will now be able to see the latest content when the user refreshes the page.&lt;/p&gt;
+
+&lt;h3&gt;Going beyond&lt;/h3&gt;
+
+&lt;p&gt;Well, if you're feeling really ambitious, perhaps you can add a feature to show a button when the cache is detected to be outdated? That way once the cache is synced in the background and updated, the user will just see a button, clicking which will just refresh the page (or perhpas just re-render the content) and the overall experience will be way more fluid.&lt;/p&gt;
+</description>
+      <guid isPermaLink="false">https://blog.deepjyoti30.dev/cache-dynamic-pages</guid>
+      <category>cache</category>
+      <category>dynamic</category>
+      <category>pages</category>
+      <category>improve</category>
+      <pubDate>Fri, 08 Jan 2021 13:17:49 +0000</pubDate>
+    </item>
     <item>
       <title>Python has a built in search function. Here's how to use it</title>
       <link>https://blog.deepjyoti30.dev/pythons-builtin-search-function</link>
