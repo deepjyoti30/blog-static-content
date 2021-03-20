@@ -13,7 +13,74 @@
       <link>https://blog.deepjyoti30.dev/feed</link>
     </image>
     <language>en</language>
-    <lastBuildDate>Thu, 25 Feb 2021 16:46:04 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 20 Mar 2021 16:05:45 +0000</lastBuildDate>
+    <item>
+      <title>I rebuilt my blog with Nuxt, now it loads in seconds</title>
+      <link>https://blog.deepjyoti30.dev//blog-redesign-nuxt</link>
+      <description>&lt;blockquote&gt;
+  &lt;p&gt;TL;DR: Rebuilt my blog (this page) with Nuxt in order to improve SEO and performance and give the whole thing a new look. Used Tailwind too (well, duh!)&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;I felt like it was about time I tried my hands on Nuxt. Considering that Vue is my goto frontend framework, Nuxt was inevitable to be skipped. Though, I cannot just &lt;em&gt;learn&lt;/em&gt; a language, I need to build something in order to get to know the language all around. So I started wondering what would be a perfect project to build with Nuxt.&lt;/p&gt;
+
+&lt;h2 id="why-nuxt"&gt;Why Nuxt?&lt;/h2&gt;
+
+&lt;p&gt;So in order to know what project would be perfect for Nuxt, I started researching a bit on why Nuxt would be better as compared to Vue. Obviously, I came across &lt;em&gt;SSR&lt;/em&gt; a lot more that I expected to. So it was time, I dived into SSR and built something that could benefit from it.&lt;/p&gt;
+
+&lt;p&gt;If you would just do a google search &lt;code&gt;Why is SSR good&lt;/code&gt;, you'd be easily prompted to a lot of sites, however all these sites will have one thing in common, &lt;em&gt;SSR is good for SEO&lt;/em&gt;. You see where this is going?&lt;/p&gt;
+
+&lt;p&gt;Out of all the apps that I have currently, this blog is the one that will be able to leverage SEO the most and yeah I was kinda bored of the old design, really started disliking it after a while.&lt;/p&gt;
+
+&lt;p&gt;So that was that. I started rebuilding my blog. The backend is still the same. The same old API built on FastAPI.&lt;/p&gt;
+
+&lt;h2 id="features"&gt;Features&lt;/h2&gt;
+
+&lt;p&gt;Yeah, I had to list down the features that I think are way better in this version. Some of the key highlights are:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Way faster&lt;/li&gt;
+&lt;li&gt;Improved SEO&lt;/li&gt;
+&lt;li&gt;Better theme&lt;/li&gt;
+&lt;li&gt;Better dark mode&lt;/li&gt;
+&lt;li&gt;Comments (thanks to &lt;a href="https://utteranc.es/"&gt;utteranc.es&lt;/a&gt;)&lt;/li&gt;
+&lt;li&gt;Everything is better&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Yeah, I honestly think this version is pretty good. I mean the older one was not bad by any means, but a lot of things were just not perfect for a blog. Things like the SEO takes the whole page a long way along.&lt;/p&gt;
+
+&lt;h3 id="theme"&gt;Theme&lt;/h3&gt;
+
+&lt;p&gt;Since I have recently started using Tailwind, I went with tailwind again and I have to admit, I like it a bit more every time I use it. It just makes so many things so much easier. Things like handling a dark theme. Talking about dark themes, consider checking out the dark theme. Just open the menu (if you're on mobile) and click on the sun icon.&lt;/p&gt;
+
+&lt;p&gt;The themes are also set based on the device theme (if the user has not explicitly set a theme). I wanted to keep an option with &lt;em&gt;auto&lt;/em&gt; that would theme the site based on the users mobile, however, I just couldn't find the motivation to add that. Perhaps in the next release?!&lt;/p&gt;
+
+&lt;h3 id="comments"&gt;Comments&lt;/h3&gt;
+
+&lt;p&gt;Okay, this is a big one. I was just going through a blog site and I came accross &lt;a href="https://utteranc.es/"&gt;utterances&lt;/a&gt;, and I have to say it's a pretty neat idea. Like the whole thing is very easy to setup.&lt;/p&gt;
+
+&lt;p&gt;However, I will have to call it both an &lt;em&gt;advantange&lt;/em&gt; and a &lt;em&gt;disadvantage&lt;/em&gt; that it is built on GitHub. This means, if the blog has readers that do not have a GitHub account, would not be able to comment.&lt;/p&gt;
+
+&lt;p&gt;However, if the blog has readers that are mostly &lt;em&gt;techies&lt;/em&gt; (read people with GitHub account), then it is like a wish come true. I think being built on GitHub, it is like an extra push for &lt;em&gt;techies&lt;/em&gt; to comment.&lt;/p&gt;
+
+&lt;p&gt;But, it is what it is, it depends on the readers whether it would be a good idea.&lt;/p&gt;
+
+&lt;h3 id="redesigned-share-menu"&gt;Redesigned share menu&lt;/h3&gt;
+
+&lt;p&gt;So, the share menu is now redesigned. It still continues the old approach however. If your device supports native share, then the custom menu will not be shown. However, most PC's does not really support it (can't vouch for Windows, totally doesn't work on i3-gaps), so the custom menu is a great addition.&lt;/p&gt;
+
+&lt;p&gt;Check it out by clicking on the share button at the end of the post, or at the top of the post.&lt;/p&gt;
+
+&lt;h2 id="conclusion"&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;I think, all things, considered, this was a pretty good chance for me to learn Nuxt and I totally enjoyed. I am already considering Nuxt for my upcoming projects. It's ofcourse good for SEO, however the whole SSR thing makes it very convinient to make the site performant. Also, really appreciate that the app is automatically built as a &lt;em&gt;PWA&lt;/em&gt;. Anyway, some more posts coming up in the following days, consider subscirbing to the newsletter!&lt;/p&gt;
+</description>
+      <guid isPermaLink="false">https://blog.deepjyoti30.dev//blog-redesign-nuxt</guid>
+      <category>nuxt</category>
+      <category>blog</category>
+      <category>design</category>
+      <category>performance</category>
+      <pubDate>Sat, 20 Mar 2021 16:05:45 +0000</pubDate>
+    </item>
     <item>
       <title>Ytmdl Web v2 is finally here. Here's what has changed!</title>
       <link>https://blog.deepjyoti30.dev/ytmdl-v2-release</link>
