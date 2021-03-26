@@ -13,7 +13,175 @@
       <link>https://blog.deepjyoti30.dev/feed</link>
     </image>
     <language>en</language>
-    <lastBuildDate>Sun, 10 Jan 2021 06:53:08 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 20 Mar 2021 16:47:07 +0000</lastBuildDate>
+    <item>
+      <title>I rebuilt my blog with Nuxt, now it loads in seconds</title>
+      <link>https://blog.deepjyoti30.dev/blog-redesign-nuxt</link>
+      <description>&lt;blockquote&gt;
+  &lt;p&gt;The repo is now open source and can be found &lt;a href="https://github.com/deepjyoti30/blog-frontend-v2"&gt;over here&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;TL;DR: Rebuilt my blog (this page) with Nuxt in order to improve SEO and performance and give the whole thing a new look. Used Tailwind too (well, duh!)&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;I felt like it was about time I tried my hands on Nuxt. Considering that Vue is my goto frontend framework, Nuxt was inevitable to be skipped. Though, I cannot just &lt;em&gt;learn&lt;/em&gt; a language, I need to build something in order to get to know the language all around. So I started wondering what would be a perfect project to build with Nuxt.&lt;/p&gt;
+
+&lt;h2&gt;Why Nuxt?&lt;/h2&gt;
+
+&lt;p&gt;So in order to know what project would be perfect for Nuxt, I started researching a bit on why Nuxt would be better as compared to Vue. Obviously, I came across &lt;em&gt;SSR&lt;/em&gt; a lot more that I expected to. So it was time, I dived into SSR and built something that could benefit from it.&lt;/p&gt;
+
+&lt;p&gt;If you would just do a google search &lt;code&gt;Why is SSR good&lt;/code&gt;, you'd be easily prompted to a lot of sites, however all these sites will have one thing in common, &lt;em&gt;SSR is good for SEO&lt;/em&gt;. You see where this is going?&lt;/p&gt;
+
+&lt;p&gt;Out of all the apps that I have currently, this blog is the one that will be able to leverage SEO the most and yeah I was kinda bored of the old design, really started disliking it after a while.&lt;/p&gt;
+
+&lt;p&gt;So that was that. I started rebuilding my blog. The backend is still the same. The same old API built on FastAPI.&lt;/p&gt;
+
+&lt;h2&gt;Features&lt;/h2&gt;
+
+&lt;p&gt;Yeah, I had to list down the features that I think are way better in this version. Some of the key highlights are:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Way faster&lt;/li&gt;
+&lt;li&gt;Improved SEO&lt;/li&gt;
+&lt;li&gt;Better theme&lt;/li&gt;
+&lt;li&gt;Better dark mode&lt;/li&gt;
+&lt;li&gt;Comments (thanks to &lt;a href="https://utteranc.es/"&gt;utteranc.es&lt;/a&gt;)&lt;/li&gt;
+&lt;li&gt;Everything is better&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Yeah, I honestly think this version is pretty good. I mean the older one was not bad by any means, but a lot of things were just not perfect for a blog. Things like the SEO takes the whole page a long way along.&lt;/p&gt;
+
+&lt;h3&gt;Theme&lt;/h3&gt;
+
+&lt;p&gt;Since I have recently started using Tailwind, I went with tailwind again and I have to admit, I like it a bit more every time I use it. It just makes so many things so much easier. Things like handling a dark theme. Talking about dark themes, consider checking out the dark theme. Just open the menu (if you're on mobile) and click on the sun icon.&lt;/p&gt;
+
+&lt;p&gt;The themes are also set based on the device theme (if the user has not explicitly set a theme). I wanted to keep an option with &lt;em&gt;auto&lt;/em&gt; that would theme the site based on the users mobile, however, I just couldn't find the motivation to add that. Perhaps in the next release?!&lt;/p&gt;
+
+&lt;h3&gt;Comments&lt;/h3&gt;
+
+&lt;p&gt;Okay, this is a big one. I was just going through a blog site and I came accross &lt;a href="https://utteranc.es/"&gt;utterances&lt;/a&gt;, and I have to say it's a pretty neat idea. Like the whole thing is very easy to setup.&lt;/p&gt;
+
+&lt;p&gt;However, I will have to call it both an &lt;em&gt;advantange&lt;/em&gt; and a &lt;em&gt;disadvantage&lt;/em&gt; that it is built on GitHub. This means, if the blog has readers that do not have a GitHub account, would not be able to comment.&lt;/p&gt;
+
+&lt;p&gt;However, if the blog has readers that are mostly &lt;em&gt;techies&lt;/em&gt; (read people with GitHub account), then it is like a wish come true. I think being built on GitHub, it is like an extra push for &lt;em&gt;techies&lt;/em&gt; to comment.&lt;/p&gt;
+
+&lt;p&gt;But, it is what it is, it depends on the readers whether it would be a good idea.&lt;/p&gt;
+
+&lt;h3&gt;Redesigned share menu&lt;/h3&gt;
+
+&lt;p&gt;So, the share menu is now redesigned. It still continues the old approach however. If your device supports native share, then the custom menu will not be shown. However, most PC's does not really support it (can't vouch for Windows, totally doesn't work on i3-gaps), so the custom menu is a great addition.&lt;/p&gt;
+
+&lt;p&gt;Check it out by clicking on the share button at the end of the post, or at the top of the post.&lt;/p&gt;
+
+&lt;h2&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;I think, all things, considered, this was a pretty good chance for me to learn Nuxt and I totally enjoyed. I am already considering Nuxt for my upcoming projects. It's ofcourse good for SEO, however the whole SSR thing makes it very convinient to make the site performant. Also, really appreciate that the app is automatically built as a &lt;em&gt;PWA&lt;/em&gt;. Anyway, some more posts coming up in the following days, consider subscirbing to the newsletter!&lt;/p&gt;
+
+&lt;p&gt;Also, the repo is now open source, in case you are interested, &lt;a href="https://github.com/deepjyoti30/blog-frontend-v2"&gt;check it out&lt;/a&gt;.&lt;/p&gt;
+</description>
+      <guid isPermaLink="false">https://blog.deepjyoti30.dev/blog-redesign-nuxt</guid>
+      <category>nuxt</category>
+      <category>blog</category>
+      <category>design</category>
+      <category>performance</category>
+      <pubDate>Sat, 20 Mar 2021 16:40:54 +0000</pubDate>
+    </item>
+    <item>
+      <title>Ytmdl Web v2 is finally here. Here's what has changed!</title>
+      <link>https://blog.deepjyoti30.dev/ytmdl-v2-release</link>
+      <description>&lt;p&gt;So it's been in works since a while now. Yep. Ytmdl Web's V2. This time it is even better! Since the first version was released, it did get a lot of traffic but it was far from perfect so I felt like I owed it to the users to give them a new, better, aweseome version that would work flawlessly.&lt;/p&gt;
+
+&lt;p&gt;So here it is. &lt;strong&gt;Ytmdl Web V2&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;h2&gt;Features&lt;/h2&gt;
+
+&lt;p&gt;So this version &lt;strong&gt;does&lt;/strong&gt; come with a lot of changes and a lot of new features. Most importantly, this version is built from the ground up and it is not just a few changes on top of the older version, you can totally expect something way better. &lt;a href="https://ytmdl.deepjyoti30.dev"&gt;Go check it out&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Some of the new features are:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Way Faster (It's a proper PWA now so that means improved performance)&lt;/li&gt;
+&lt;li&gt;Better Downloads&lt;/li&gt;
+&lt;li&gt;User Settings&lt;/li&gt;
+&lt;li&gt;Manual Metadata&lt;/li&gt;
+&lt;li&gt;URL Support&lt;/li&gt;
+&lt;li&gt;Open Source (yep, not a feature, but it is!!)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3&gt;Way Faster&lt;/h3&gt;
+
+&lt;p&gt;The previous version was just a badly built webapp that wasn't optimized in many ways and it took ages to load. I have to admit, I was just a newbie getting started with Vue when I built that app and I am not going to call it one of the better apps I built. I agree, the functionality was good, it worked all right, but it was not perfect. You can see that for yourself in the following Lighthouse score of the older version.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="https://raw.githubusercontent.com/deepjyoti30/blog-static-content/master/content/ytmdlweb-v1-score.png" alt="YtmdlWeb V1 Lighthouse Score" /&gt;
+&lt;em&gt;Ytmdl Web v1 lighthouse score&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;I know, Lighthouse score doesn't mean everything but it does indicate some of the important things that were skipped in the first iteration of the app.&lt;/p&gt;
+
+&lt;p&gt;To fix those things, I finally built the second iteration from scratch. Keeping in mind everything. Most important change on this version is I have added &lt;a href="https://developers.google.com/web/tools/workbox"&gt;workbox&lt;/a&gt;. This means the app will be a proper Progressive Web App now and will load way faster since a lot of files will be cached once the first load is done.&lt;/p&gt;
+
+&lt;p&gt;Also the code is improved a lot which compressed the overall app size to &lt;strong&gt;145KiB Gzipped&lt;/strong&gt;. This is important since devices with slow important might not be able to download large content at once.&lt;/p&gt;
+
+&lt;p&gt;Anyway, check the lighthouse score of the newer version below. It is &lt;em&gt;almost&lt;/em&gt; perfect.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="https://raw.githubusercontent.com/deepjyoti30/blog-static-content/master/content/ytmdlweb-v2-score.png" alt="Ytmdlweb V2 Lighthouse Score" /&gt;
+&lt;em&gt;Ytmdl Web v2 lighthouse score&lt;/em&gt;&lt;/p&gt;
+
+&lt;h3&gt;Better Downloads&lt;/h3&gt;
+
+&lt;p&gt;Not just the app, the backend is also redone this time. I will probably write a separate post about that later.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;TL;DR: The backend is now rewritten using FastAPI and works way better.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;This time, the backend is written in FastAPI and yeah, it is better in a lot of ways. However, one of the most important changes in this version of the API is that downloading the song is now done after the user has selected both the song and metadata.&lt;/p&gt;
+
+&lt;p&gt;In the previous version, following was the flow:&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nx"&gt;Select&lt;/span&gt; &lt;span class="nx"&gt;Song&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nx"&gt;Downloaded&lt;/span&gt; &lt;span class="nx"&gt;song&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nx"&gt;Selecte&lt;/span&gt; &lt;span class="nx"&gt;metadata&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nx"&gt;Add&lt;/span&gt; &lt;span class="nx"&gt;metadata&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nx"&gt;Let&lt;/span&gt; &lt;span class="nx"&gt;user&lt;/span&gt; &lt;span class="nx"&gt;download&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;In this version, the flow is refactored to the following:&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nx"&gt;Select&lt;/span&gt; &lt;span class="nx"&gt;Song&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nx"&gt;Select&lt;/span&gt; &lt;span class="nx"&gt;metadata&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nx"&gt;Download&lt;/span&gt; &lt;span class="nx"&gt;song&lt;/span&gt; &lt;span class="nx"&gt;and&lt;/span&gt; &lt;span class="nx"&gt;Add&lt;/span&gt; &lt;span class="nx"&gt;metadata&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nx"&gt;Let&lt;/span&gt; &lt;span class="nx"&gt;user&lt;/span&gt; &lt;span class="nx"&gt;download&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This might not seem like a lot of improvement, but it is. In the previous version, we had to know which file the API was working since the first request which added a lot of overhead. That restriction is now gone with this release.&lt;/p&gt;
+
+&lt;h3&gt;User Settings&lt;/h3&gt;
+
+&lt;p&gt;On this version, user settings are introduced. There are settings like default song format. So if you select one format and keep it default, you wouldn't be asked to select it everytime. When I was building the app, I wanted to make sure that the user has the best experience possible and so User Settings were an important part of it.&lt;/p&gt;
+
+&lt;p&gt;You can check user settings by going to the &lt;code&gt;/settings&lt;/code&gt; route in the webapp.&lt;/p&gt;
+
+&lt;h3&gt;Manual Metadata&lt;/h3&gt;
+
+&lt;p&gt;Yes. The CLI version has it so I thought the web version totally needed that feature, so here it is. Based on the various user reports in the CLI app, it seemed like this would be a necessary feature because no matter how many meta sources we add, there's always that one song from an Indie singer that doesn't exist in any servers. In cases like that people can now opt for manually inserting the metadata and downloading the song.&lt;/p&gt;
+
+&lt;h3&gt;URL Support&lt;/h3&gt;
+
+&lt;p&gt;Since the CLI version supported it, the web version needed to add support for &lt;strong&gt;Youtube URL's&lt;/strong&gt;, so here it is. Instead of entering a song name, you can just enter a valid YouTube URL and Ytmdl will automatically take you to the next page of selecting metadata. It's not much but it might come very handy at times.&lt;/p&gt;
+
+&lt;h3&gt;Other Changes&lt;/h3&gt;
+
+&lt;h4&gt;Addition of Opus&lt;/h4&gt;
+
+&lt;p&gt;Not just the above, there are a lot of under the hood, quality of life patches. One of those is addition of &lt;strong&gt;Opus&lt;/strong&gt; as a song format. The previous version just supported &lt;strong&gt;m4a&lt;/strong&gt; and &lt;strong&gt;mp3&lt;/strong&gt; so this version adds one to the list.&lt;/p&gt;
+
+&lt;h4&gt;Open Source&lt;/h4&gt;
+
+&lt;p&gt;If you're a part of the Telegram Channel, you'd know that a lot of users keep asking if the Web version is open source so I gave it some thought and finally decided to make this version open source. Not just that, this version comes with container images that can be deployed right away so that you have the freedom of using a self hosted version. You can find the &lt;a href="https://github.com/deepjyoti30/ytmdl-web-v2"&gt;source here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;I am really excited to finally be able to release this version, especially considering the response that I got with the first version of the app. Also, if you feel like there are some settings that might be a nice addition to the current app, feel free to raise an issue on GitHub.&lt;/p&gt;
+</description>
+      <guid isPermaLink="false">https://blog.deepjyoti30.dev/ytmdl-v2-release</guid>
+      <category>ytmdl</category>
+      <category>webapp</category>
+      <category>vue</category>
+      <category>python</category>
+      <pubDate>Thu, 25 Feb 2021 16:35:46 +0000</pubDate>
+    </item>
     <item>
       <title>Cache dynamic pages for better performance</title>
       <link>https://blog.deepjyoti30.dev/cache-dynamic-pages</link>
