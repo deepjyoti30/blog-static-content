@@ -13,10 +13,10 @@
       <link>https://blog.deepjyoti30.dev/feed</link>
     </image>
     <language>en</language>
-    <lastBuildDate>Fri, 26 Mar 2021 06:11:04 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 26 Mar 2021 06:18:57 +0000</lastBuildDate>
     <item>
       <title>Automate Tests With GitHub Actions for Python</title>
-      <link>https://blog.deepjyoti30.dev//tests-github-python</link>
+      <link>https://blog.deepjyoti30.dev/tests-github-python</link>
       <description>&lt;p&gt;Since the addition of GitHub Actions, a lot of things, that previsouly we had to use third party services for, have become easier. Recently, an user raised an issue in my &lt;a href="https://github.com/deepjyoti30/downloader-cli"&gt;downloader-cli&lt;/a&gt; repository. He suggested that addition of tests would be greatly helpful. More importantly because that way when people make a PR, the tests would tell the developers if the PR can be accepted.&lt;/p&gt;
 
 &lt;p&gt;So, I decided to add some nice tests for my app. &lt;code&gt;downloader-cli&lt;/code&gt; is written in Python and it is a small, simple, downloader library that features a highly customizable, responsive progressbar for the commandline.&lt;/p&gt;
@@ -121,7 +121,7 @@
 
 &lt;p&gt;Also, in case you want to take a look at the file from my &lt;code&gt;downloader-cli&lt;/code&gt; repo, you can &lt;a href="https://github.com/deepjyoti30/downloader-cli/blob/master/.github/workflows/test.yml"&gt;check it here&lt;/a&gt;.&lt;/p&gt;
 </description>
-      <guid isPermaLink="false">https://blog.deepjyoti30.dev//tests-github-python</guid>
+      <guid isPermaLink="false">https://blog.deepjyoti30.dev/tests-github-python</guid>
       <category>tests</category>
       <category>python</category>
       <category>github</category>
