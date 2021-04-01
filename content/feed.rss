@@ -13,7 +13,43 @@
       <link>https://blog.deepjyoti30.dev/feed</link>
     </image>
     <language>en</language>
-    <lastBuildDate>Fri, 26 Mar 2021 06:19:29 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 01 Apr 2021 06:51:15 +0000</lastBuildDate>
+    <item>
+      <title>Ytmdl Web Will Now Have Ads</title>
+      <link>https://blog.deepjyoti30.dev/ytmdl-web-ads</link>
+      <description>&lt;p&gt;As of today (01/04/2021), &lt;strong&gt;Ytmdl Web&lt;/strong&gt; will show ads. This was not intentional in any way and I honestly wanted to keep the app totally free for everyone. However, off late, the traffic that it has been getting, it has been very hard to handle the server costs for the app.&lt;/p&gt;
+
+&lt;h2 id="some-backstory"&gt;Some backstory&lt;/h2&gt;
+
+&lt;p&gt;Ytmdl Web V2 was released about a month ago. After release, I shared it on various places like Reddit and over night, it got a lot of hits. I got about 75k hits on my API within 1 and a half day. This hits were, obviously, not anticipated for and my server went out of space. I instantly fixed that issue by increasing the storage of the server and it was fixed. However, within a few hours after that, the server started responding with &lt;code&gt;500 Internal Server Error&lt;/code&gt; while trying to download songs.&lt;/p&gt;
+
+&lt;p&gt;I took a look at the logs and as it turns out, because of so many requests in such a short time, my servers IP address was blocked by YouTube servers. This meant, I had to change servers. This is when I figured I had some free Heroku credits so within a few minutes I made some changes to the API and deployed it to Heroku. Since then, the traffic slowed down and the Youtube IP blocking issue has not occurred.&lt;/p&gt;
+
+&lt;p&gt;It was going fine until a few days ago when users started facing issues again. As it turns out, the Heroku servers were going out of RAM and I didn't have enough credits to use a production server with like 8Gb of RAM. Thus, there was no way out. Even though the API worked, sometimes it stopped (usually when it gets a lot of subsequent requests at the same time).&lt;/p&gt;
+
+&lt;h2 id="why-ads"&gt;Why Ads&lt;/h2&gt;
+
+&lt;p&gt;I wanted to keep the web app self dependent and being able to get enough donations in order to handle the server costs. I was strictly against ads. You can see my comments on my &lt;a href="https://www.reddit.com/r/Piracy/comments/lsslbl/ytmdl_web_a_webapp_that_lets_you_download_music/"&gt;Reddit post&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;However, a lot of people, after finding out about the server issues, suggested that I add basic banner ads. Some people even went as far as asking me to add ads and that they will specifically stop their ad blocker for my site (and people say Reddit people are hostile!). Anyway, at the time, I did not give it much thought since ads would ruin the look of the app.&lt;/p&gt;
+
+&lt;p&gt;However, it has been a whole month since the release. The donations are almost non existent. The traffic reports show that I am still getting about &lt;strong&gt;4.2k&lt;/strong&gt; active users for the blog (even after a month of release). Thus, I thought, there was no other way but to enable ads in order to handle the costs.&lt;/p&gt;
+
+&lt;h2 id="whats-next"&gt;Whats next?&lt;/h2&gt;
+
+&lt;p&gt;Well, if you are an user of the app, you can consider disabling your ad blocker. I promise, it won't obstruct the flow of the app. If it does, feel free to enable it again. Also, if it does, you can reach out to me and inform me about that.&lt;/p&gt;
+
+&lt;p&gt;I am planning to get a dedicated domain for the app as well. Let's just hope we get enough ad revenue. Fingers are crossed!&lt;/p&gt;
+
+&lt;p&gt;Thanks for all the support till now! Really appreciate it. You can &lt;a href="https://ytmdl.deepjyoti30.dev"&gt;check the app here&lt;/a&gt; and &lt;a href="https://github.com/deepjyoti30/ytmdl-web-v2"&gt;it's source code here&lt;/a&gt;&lt;/p&gt;
+</description>
+      <guid isPermaLink="false">https://blog.deepjyoti30.dev/ytmdl-web-ads</guid>
+      <category>ytmdl</category>
+      <category>web</category>
+      <category>ads</category>
+      <category>python</category>
+      <pubDate>Thu, 01 Apr 2021 06:51:15 +0000</pubDate>
+    </item>
     <item>
       <title>Automate Tests With GitHub Actions for Python</title>
       <link>https://blog.deepjyoti30.dev/tests-github-python</link>
