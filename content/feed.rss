@@ -13,7 +13,185 @@
       <link>https://blog.deepjyoti30.dev/feed</link>
     </image>
     <language>en</language>
-    <lastBuildDate>Thu, 01 Apr 2021 06:51:15 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 07 Apr 2021 13:34:47 +0000</lastBuildDate>
+    <item>
+      <title>Deploy Celery &amp; RabbitMQ with Compose</title>
+      <link>https://blog.deepjyoti30.dev/celery_compose</link>
+      <description>&lt;p&gt;Off late, I had been working a lot with FastAPI. Recently, however I had a requirement. I needed to run tasks in the background after the request was made. So something like, when the request is recieved, add it to the task list and return a response. The task will be done in the background.&lt;/p&gt;
+
+&lt;p&gt;I somewhat knew about &lt;a href="https://docs.celeryproject.org/"&gt;Celery&lt;/a&gt;, however never had the need to work with it. So I finally decided to use Celery and boy oh boy, was I surprised.&lt;/p&gt;
+
+&lt;h2 id="what-is-celery"&gt;What is Celery&lt;/h2&gt;
+
+&lt;p&gt;So, Celery is a task scheduler. What I described above in the first paragraph, Celery does exactly that! We pass it a task and it runs that in the background.&lt;/p&gt;
+
+&lt;p&gt;It basically runs the task as a synchornous function which effectively makes the function run in the background. &lt;a href="https://docs.celeryproject.org/en/stable/getting-started/introduction.html"&gt;You can read more about it here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;However, in order for Celery to run properly, it needs a &lt;strong&gt;broker&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;h3 id="what-is-a-broker"&gt;What is a broker?&lt;/h3&gt;
+
+&lt;p&gt;A broker will keep a list of all the tasks that are to be executed and will accordingly supply Celery with the tasks. Celery will then use the task and work on it.&lt;/p&gt;
+
+&lt;p&gt;Directly from Google:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;A broker is a person or firm who arranges transactions between a buyer and a seller for a commission when the deal is executed.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;This pretty much sums it up. In our case, we are the &lt;strong&gt;seller&lt;/strong&gt;, celery is the &lt;strong&gt;buyer&lt;/strong&gt; and we will use a &lt;strong&gt;broker&lt;/strong&gt; in between in order to handle all the tasks. Brokers are also called as message queues or task queues.&lt;/p&gt;
+
+&lt;p&gt;Some of the brokers that Celery works with are:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://www.rabbitmq.com/"&gt;RabbitMQ&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://redis.io/"&gt;Redis&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id="rabbitmq"&gt;RabbitMQ&lt;/h3&gt;
+
+&lt;p&gt;In this article, I will primarily use &lt;strong&gt;RabbitMQ&lt;/strong&gt; as the broker. You can read on how to &lt;a href="https://docs.celeryproject.org/en/stable/getting-started/brokers/redis.html"&gt;use Redis with Celery&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Easiest way to setup RabbitMQ is to use a docker file. Using the following command, a container with RabbitMQ can be deployed within seconds.&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="go"&gt;docker run -d --rm -it --hostname my-rabbit -p 15672:15672 -p 5672:5672 rabbitmq:3-management&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;In the above command, the &lt;code&gt;management&lt;/code&gt; image is used. You can check &lt;a href="https://hub.docker.com/_/rabbitmq"&gt;other available images here&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Breaking down the above command:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;We are mapping the &lt;code&gt;15672&lt;/code&gt; port of the container to our host&lt;/li&gt;
+&lt;li&gt;We are mapping the &lt;code&gt;5672&lt;/code&gt; port of the container to our host.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;This is because the &lt;code&gt;15672&lt;/code&gt; port serves the GUI for rabbitmq and &lt;code&gt;5672&lt;/code&gt; is how &lt;strong&gt;Celery&lt;/strong&gt; will communicate with it.&lt;/p&gt;
+
+&lt;h2 id="worker"&gt;Worker&lt;/h2&gt;
+
+&lt;p&gt;Now that we have our broker in place, let's use a Dockerfile to deploy &lt;strong&gt;Celery&lt;/strong&gt;. Celery, since it does tasks in the background, is referred to as &lt;strong&gt;worker&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;We will build the &lt;code&gt;worker&lt;/code&gt; with the following Dockerfile:&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;FROM python:3.6&lt;/span&gt;
+
+&lt;span class="l l-Scalar l-Scalar-Plain"&gt;# copy contents of project into docker&lt;/span&gt;
+&lt;span class="l l-Scalar l-Scalar-Plain"&gt;COPY ./ /app/&lt;/span&gt;
+
+&lt;span class="l l-Scalar l-Scalar-Plain"&gt;# We will use internal functions of the API&lt;/span&gt;
+&lt;span class="l l-Scalar l-Scalar-Plain"&gt;# So install all dependencies of the API&lt;/span&gt;
+&lt;span class="l l-Scalar l-Scalar-Plain"&gt;RUN cd app &amp;amp;&amp;amp; pip install -r requirements.txt&lt;/span&gt;
+
+&lt;span class="l l-Scalar l-Scalar-Plain"&gt;WORKDIR /app&lt;/span&gt;
+
+&lt;span class="l l-Scalar l-Scalar-Plain"&gt;ENTRYPOINT celery -A worker worker --loglevel=INFO&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Using the above Dockerfile, we can deploy the worker.&lt;/p&gt;
+
+&lt;h2 id="using-a-compose-file"&gt;Using a compose file&lt;/h2&gt;
+
+&lt;p&gt;Now that we have two of the services ready, we are ready to write our &lt;strong&gt;docker compose&lt;/strong&gt; file. &lt;a href="https://docs.docker.com/compose/gettingstarted/"&gt;Read more about docker compose here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Usually, the worker is run along with an API and the API makes calls to the worker in order to run the worker tasks in the background.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;In our case, we will be creating two containers:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;RabbitMQ container&lt;/li&gt;
+&lt;li&gt;Worker container&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;We want our worker to access the rabbitMQ container through the network and accordingly use it as a broker.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Most of the time, you'll probably also need an API container that will also interact with the worker using the network.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Following is the compose file:&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;version&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;3.7&amp;quot;&lt;/span&gt;
+
+&lt;span class="nt"&gt;services&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+  &lt;span class="c1"&gt;# Deploy the broker.&lt;/span&gt;
+  &lt;span class="nt"&gt;rabbitmq_server&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="nt"&gt;image&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;rabbitmq:3-management&lt;/span&gt;
+    &lt;span class="nt"&gt;ports&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+      &lt;span class="c1"&gt;# Expose the port for the worker to add/get tasks&lt;/span&gt;
+      &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;5672:5672&lt;/span&gt;
+      &lt;span class="c1"&gt;# OPTIONAL: Expose the GUI port&lt;/span&gt;
+      &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;15672:15672&lt;/span&gt;
+
+  &lt;span class="c1"&gt;# Deploy the worker&lt;/span&gt;
+  &lt;span class="nt"&gt;worker&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="c1"&gt;# Build using the worker Dockerfile&lt;/span&gt;
+    &lt;span class="nt"&gt;build&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+      &lt;span class="nt"&gt;context&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;.&lt;/span&gt;
+      &lt;span class="nt"&gt;dockerfile&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;worker.Dockerfile&lt;/span&gt;
+    &lt;span class="c1"&gt;# Need to access the database&lt;/span&gt;
+    &lt;span class="c1"&gt;# OPTIONAL: If you worker needs to access your db that is deployed&lt;/span&gt;
+    &lt;span class="c1"&gt;# locally, then make the network mode as host.&lt;/span&gt;
+    &lt;span class="nt"&gt;network_mode&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;host&lt;/span&gt;
+    &lt;span class="c1"&gt;# Pass the rabbitmq_uri as env varible in order to&lt;/span&gt;
+    &lt;span class="c1"&gt;# connect to our service&lt;/span&gt;
+    &lt;span class="nt"&gt;environment&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+      &lt;span class="c1"&gt;# NOTE: Below we are using 127.0.0.1 because this container&lt;/span&gt;
+      &lt;span class="c1"&gt;# will run on the host network, thus it will have access to the&lt;/span&gt;
+      &lt;span class="c1"&gt;# host network.&lt;/span&gt;
+      &lt;span class="c1"&gt;# If it would not have run locally, we would have had to&lt;/span&gt;
+      &lt;span class="c1"&gt;# connect using the service name like following:&lt;/span&gt;
+      &lt;span class="c1"&gt;# amqp:rabbitmq_server:5672&lt;/span&gt;
+      &lt;span class="nt"&gt;rabbitmq_uri&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;amqp://127.0.0.1:5672&lt;/span&gt;
+    &lt;span class="c1"&gt;# Make it wait for rabbitmq deployment&lt;/span&gt;
+    &lt;span class="nt"&gt;depends_on&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; 
+      &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;rabbitmq_server&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;With the above file, you can deploy it as follows:&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="go"&gt;docker-compose -f docker-compose.yml up --detach --scale worker=2 --build&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;In the above command, we are scaling the &lt;code&gt;worker&lt;/code&gt; service to have 2 containers.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id="gotchas-to-look-out-for"&gt;Gotcha's to look out for&lt;/h2&gt;
+
+&lt;h3 id="connection-uri-for-rabbitmq"&gt;Connection URI for RabbitMQ&lt;/h3&gt;
+
+&lt;p&gt;Let's say we have RabbitMQ deployed in a container called &lt;code&gt;rabbitmq&lt;/code&gt;. Now, from our &lt;code&gt;worker&lt;/code&gt; container we need to access RabbitMQ in order to add tasks. In this case, we will have to connect to RabbitMQ using a connection URI. This URI will be something like:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;amqp://rabbitmq:5672&lt;/code&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Note that we have name of the container in the URI. This will map the URI to the network of that container.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Typically this URI should be something like &lt;code&gt;amqp://localhost:5672&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;However, now, let's say we need to run our container in the network. This can be easily done using the &lt;code&gt;network_mode: host&lt;/code&gt; field in the compose file or the &lt;code&gt;--network=host&lt;/code&gt; arguement to the deploy command.&lt;/p&gt;
+
+&lt;p&gt;In cases like this, our container will have the network of the host which means the RabbitMQ container will be accessible as it will be accessible to the network which will be:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;amqp://127.0.0.1:5672&lt;/code&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Note that we exposed the port 5672 when deploying the rabbitmq container.&lt;/p&gt;
+&lt;/blockquote&gt;
+</description>
+      <guid isPermaLink="false">https://blog.deepjyoti30.dev/celery_compose</guid>
+      <category>celery</category>
+      <category>rabbitmq</category>
+      <category>docker</category>
+      <category>compose</category>
+      <pubDate>Wed, 07 Apr 2021 13:34:47 +0000</pubDate>
+    </item>
     <item>
       <title>Ytmdl Web Will Now Have Ads</title>
       <link>https://blog.deepjyoti30.dev/ytmdl-web-ads</link>
