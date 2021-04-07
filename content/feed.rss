@@ -13,7 +13,7 @@
       <link>https://blog.deepjyoti30.dev/feed</link>
     </image>
     <language>en</language>
-    <lastBuildDate>Wed, 07 Apr 2021 13:34:47 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 07 Apr 2021 13:39:06 +0000</lastBuildDate>
     <item>
       <title>Deploy Celery &amp; RabbitMQ with Compose</title>
       <link>https://blog.deepjyoti30.dev/celery_compose</link>
@@ -21,7 +21,7 @@
 
 &lt;p&gt;I somewhat knew about &lt;a href="https://docs.celeryproject.org/"&gt;Celery&lt;/a&gt;, however never had the need to work with it. So I finally decided to use Celery and boy oh boy, was I surprised.&lt;/p&gt;
 
-&lt;h2 id="what-is-celery"&gt;What is Celery&lt;/h2&gt;
+&lt;h2&gt;What is Celery&lt;/h2&gt;
 
 &lt;p&gt;So, Celery is a task scheduler. What I described above in the first paragraph, Celery does exactly that! We pass it a task and it runs that in the background.&lt;/p&gt;
 
@@ -29,7 +29,7 @@
 
 &lt;p&gt;However, in order for Celery to run properly, it needs a &lt;strong&gt;broker&lt;/strong&gt;.&lt;/p&gt;
 
-&lt;h3 id="what-is-a-broker"&gt;What is a broker?&lt;/h3&gt;
+&lt;h3&gt;What is a broker?&lt;/h3&gt;
 
 &lt;p&gt;A broker will keep a list of all the tasks that are to be executed and will accordingly supply Celery with the tasks. Celery will then use the task and work on it.&lt;/p&gt;
 
@@ -48,7 +48,7 @@
 &lt;li&gt;&lt;a href="https://redis.io/"&gt;Redis&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h3 id="rabbitmq"&gt;RabbitMQ&lt;/h3&gt;
+&lt;h3&gt;RabbitMQ&lt;/h3&gt;
 
 &lt;p&gt;In this article, I will primarily use &lt;strong&gt;RabbitMQ&lt;/strong&gt; as the broker. You can read on how to &lt;a href="https://docs.celeryproject.org/en/stable/getting-started/brokers/redis.html"&gt;use Redis with Celery&lt;/a&gt;.&lt;/p&gt;
 
@@ -70,29 +70,29 @@
 
 &lt;p&gt;This is because the &lt;code&gt;15672&lt;/code&gt; port serves the GUI for rabbitmq and &lt;code&gt;5672&lt;/code&gt; is how &lt;strong&gt;Celery&lt;/strong&gt; will communicate with it.&lt;/p&gt;
 
-&lt;h2 id="worker"&gt;Worker&lt;/h2&gt;
+&lt;h2&gt;Worker&lt;/h2&gt;
 
 &lt;p&gt;Now that we have our broker in place, let's use a Dockerfile to deploy &lt;strong&gt;Celery&lt;/strong&gt;. Celery, since it does tasks in the background, is referred to as &lt;strong&gt;worker&lt;/strong&gt;.&lt;/p&gt;
 
 &lt;p&gt;We will build the &lt;code&gt;worker&lt;/code&gt; with the following Dockerfile:&lt;/p&gt;
 
-&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;FROM python:3.6&lt;/span&gt;
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;FROM&lt;/span&gt; &lt;span class="s"&gt;python:3.6&lt;/span&gt;
 
-&lt;span class="l l-Scalar l-Scalar-Plain"&gt;# copy contents of project into docker&lt;/span&gt;
-&lt;span class="l l-Scalar l-Scalar-Plain"&gt;COPY ./ /app/&lt;/span&gt;
+&lt;span class="c"&gt;# copy contents of project into docker&lt;/span&gt;
+&lt;span class="k"&gt;COPY&lt;/span&gt; ./ /app/
 
-&lt;span class="l l-Scalar l-Scalar-Plain"&gt;# We will use internal functions of the API&lt;/span&gt;
-&lt;span class="l l-Scalar l-Scalar-Plain"&gt;# So install all dependencies of the API&lt;/span&gt;
-&lt;span class="l l-Scalar l-Scalar-Plain"&gt;RUN cd app &amp;amp;&amp;amp; pip install -r requirements.txt&lt;/span&gt;
+&lt;span class="c"&gt;# We will use internal functions of the API&lt;/span&gt;
+&lt;span class="c"&gt;# So install all dependencies of the API&lt;/span&gt;
+&lt;span class="k"&gt;RUN&lt;/span&gt; &lt;span class="nb"&gt;cd&lt;/span&gt; app &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; pip install -r requirements.txt
 
-&lt;span class="l l-Scalar l-Scalar-Plain"&gt;WORKDIR /app&lt;/span&gt;
+&lt;span class="k"&gt;WORKDIR&lt;/span&gt;&lt;span class="s"&gt; /app&lt;/span&gt;
 
-&lt;span class="l l-Scalar l-Scalar-Plain"&gt;ENTRYPOINT celery -A worker worker --loglevel=INFO&lt;/span&gt;
+&lt;span class="k"&gt;ENTRYPOINT&lt;/span&gt; celery -A worker worker --loglevel&lt;span class="o"&gt;=&lt;/span&gt;INFO
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Using the above Dockerfile, we can deploy the worker.&lt;/p&gt;
 
-&lt;h2 id="using-a-compose-file"&gt;Using a compose file&lt;/h2&gt;
+&lt;h2&gt;Using a compose file&lt;/h2&gt;
 
 &lt;p&gt;Now that we have two of the services ready, we are ready to write our &lt;strong&gt;docker compose&lt;/strong&gt; file. &lt;a href="https://docs.docker.com/compose/gettingstarted/"&gt;Read more about docker compose here&lt;/a&gt;.&lt;/p&gt;
 
@@ -161,9 +161,9 @@
   &lt;p&gt;In the above command, we are scaling the &lt;code&gt;worker&lt;/code&gt; service to have 2 containers.&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;h2 id="gotchas-to-look-out-for"&gt;Gotcha's to look out for&lt;/h2&gt;
+&lt;h2&gt;Gotcha's to look out for&lt;/h2&gt;
 
-&lt;h3 id="connection-uri-for-rabbitmq"&gt;Connection URI for RabbitMQ&lt;/h3&gt;
+&lt;h3&gt;Connection URI for RabbitMQ&lt;/h3&gt;
 
 &lt;p&gt;Let's say we have RabbitMQ deployed in a container called &lt;code&gt;rabbitmq&lt;/code&gt;. Now, from our &lt;code&gt;worker&lt;/code&gt; container we need to access RabbitMQ in order to add tasks. In this case, we will have to connect to RabbitMQ using a connection URI. This URI will be something like:&lt;/p&gt;
 
