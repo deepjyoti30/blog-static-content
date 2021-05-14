@@ -13,7 +13,7 @@
       <link>https://blog.deepjyoti30.dev/feed</link>
     </image>
     <language>en</language>
-    <lastBuildDate>Fri, 14 May 2021 09:57:36 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 14 May 2021 10:20:43 +0000</lastBuildDate>
     <item>
       <title>Easily Test Mixins With Jest</title>
       <link>https://blog.deepjyoti30.dev/mixins-test-jest</link>
@@ -23,13 +23,17 @@
 
 &lt;p&gt;I loved the fact that it was so easy to setup and as I started writing tests I understood that it's actually very easy to use as well. So all in all, I ended up using Jest as the testing framework for my project.&lt;/p&gt;
 
-&lt;h2 id="testing-mixins"&gt;Testing Mixins&lt;/h2&gt;
+&lt;h2&gt;Testing Mixins&lt;/h2&gt;
 
 &lt;p&gt;After I had written tests for most of my components, I finally decided to write tests for my mixins. This is when I came to a stop. I started looking at the docs in order to know what the best way to test mixins would be. However, there wasn't much documentation regarding that.&lt;/p&gt;
 
 &lt;p&gt;This is when I realized something.&lt;/p&gt;
 
-&lt;h3 id="what-are-mixins"&gt;What are mixins?&lt;/h3&gt;
+&lt;h3&gt;What are mixins?&lt;/h3&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;A mixin is a class containing methods that can be used by other classes without a need to inherit from it&lt;/p&gt;
+&lt;/blockquote&gt;
 
 &lt;p&gt;As &lt;a href="https://en.wikipedia.org/wiki/Mixin"&gt;stated on Wikipedia&lt;/a&gt;, &lt;em&gt;a mixin is a class containing methods that can be used by other classes without a need to inherit from it&lt;/em&gt;.&lt;/p&gt;
 
@@ -37,7 +41,11 @@
 
 &lt;p&gt;This also means that &lt;strong&gt;mixins cannot be used independently&lt;/strong&gt;. What I mean is, let's say you have a mixin defined in VueJS. Now you want to use this mixin. You can easily import it and use. However, in your source code is there any use of the mixin without it getting imported? No.&lt;/p&gt;
 
-&lt;h2 id="mock-component"&gt;Mock Component&lt;/h2&gt;
+&lt;h2&gt;Mock Component&lt;/h2&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;We will create a mock component, a bare bones component basically, to inherit the mixin to that and test it.&lt;/p&gt;
+&lt;/blockquote&gt;
 
 &lt;p&gt;Now that our doubt about mixins is out of the way. It is clear, we will &lt;strong&gt;need&lt;/strong&gt; a component that can import the Mixin in order to test it. So what should we do?&lt;/p&gt;
 
@@ -60,7 +68,7 @@
 
 &lt;p&gt;Once we have a component, we can easily use it to use our mixins and use it accordingly.&lt;/p&gt;
 
-&lt;h2 id="using-mock-component-with-mixin"&gt;Using mock component with Mixin&lt;/h2&gt;
+&lt;h2&gt;Using mock component with Mixin&lt;/h2&gt;
 
 &lt;p&gt;Let's say we have a mixin with a function &lt;code&gt;getBoolFromValue()&lt;/code&gt;, we can easily write a jest test for that now:&lt;/p&gt;
 
@@ -75,7 +83,7 @@
 &lt;span class="p"&gt;})&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;h2 id="why-not-use-a-component-from-the-code"&gt;Why not use a component from the code?&lt;/h2&gt;
+&lt;h2&gt;Why not use a component from the code?&lt;/h2&gt;
 
 &lt;p&gt;Well, using a component already defined in the code would work too. However, why add all the bulk while testing a mixin. We want the mixin to be tested as easily as possible. As well, adding a component might add some bulky imports etc, so it is way easier to just keep a &lt;code&gt;MockComponent&lt;/code&gt; that is just basically an empty template to test Mixins.&lt;/p&gt;
 
