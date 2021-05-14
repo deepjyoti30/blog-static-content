@@ -13,7 +13,81 @@
       <link>https://blog.deepjyoti30.dev/feed</link>
     </image>
     <language>en</language>
-    <lastBuildDate>Wed, 07 Apr 2021 13:39:06 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 14 May 2021 09:50:18 +0000</lastBuildDate>
+    <item>
+      <title>Easily Test Mixins With Jest</title>
+      <link>https://blog.deepjyoti30.dev/mixins-test-jest</link>
+      <description>&lt;p&gt;So recently I decided to add tests to one of my &lt;a href="https://github.com/deepjyoti30/ytmdl-web-v2"&gt;repos&lt;/a&gt;. Since I am new to JS to some extent, I started looking for what the best ways were to add tests to a frontend project. Well, as it turns out there are many libraries (duhh, it's JS afterall). However, there are various types of testing as well like &lt;strong&gt;Unit Testing&lt;/strong&gt; or &lt;strong&gt;Component Testing&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;This post is not about those tests though. After looking a bit for the best library to use with VueJS, I decided on using &lt;a href="https://jestjs.io/"&gt;jest&lt;/a&gt;. I am not an expert but it doesn't take an expert to know that Jest was built for &lt;strong&gt;ReactJS&lt;/strong&gt;. Well, for starter, Jest is built by Facebook and &lt;code&gt;has a great integration with React. js&lt;/code&gt;. So yeah, Jest might not be the first choice of Vue users.&lt;/p&gt;
+
+&lt;p&gt;I loved the fact that it was so easy to setup and as I started writing tests I understood that it's actually very easy to use as well. So all in all, I ended up using Jest as the testing framework for my project.&lt;/p&gt;
+
+&lt;h2 id="testing-mixins"&gt;Testing Mixins&lt;/h2&gt;
+
+&lt;p&gt;After I had written tests for most of my components, I finally decided to write tests for my mixins. This is when I came to a stop. I started looking at the docs in order to know what the best way to test mixins would be. However, there wasn't much documentation regarding that.&lt;/p&gt;
+
+&lt;p&gt;This is when I realized something.&lt;/p&gt;
+
+&lt;h3 id="what-are-mixins"&gt;What are mixins?&lt;/h3&gt;
+
+&lt;p&gt;As &lt;a href="https://en.wikipedia.org/wiki/Mixin"&gt;stated on Wikipedia&lt;/a&gt;, &lt;em&gt;a mixin is a class containing methods that can be used by other classes without a need to inherit from it&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;In case you are not familiar to mixins (why are you even reading this article about writing tests for mixins then?), mixins are functions that developers can &lt;em&gt;inherit&lt;/em&gt; in some other code and use them.&lt;/p&gt;
+
+&lt;p&gt;This also means that &lt;strong&gt;mixins cannot be used independently&lt;/strong&gt;. What I mean is, let's say you have a mixin defined in VueJS. Now you want to use this mixin. You can easily import it and use. However, in your source code is there any use of the mixin without it getting imported? No.&lt;/p&gt;
+
+&lt;h2 id="mock-component"&gt;Mock Component&lt;/h2&gt;
+
+&lt;p&gt;Now that our doubt about mixins is out of the way. It is clear, we will &lt;strong&gt;need&lt;/strong&gt; a component that can import the Mixin in order to test it. So what should we do?&lt;/p&gt;
+
+&lt;p&gt;We can just make a simple Mock Component. In my case, I went with a simple Mock Component written in Vue in the following way:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;template&amp;gt;
+  &amp;lt;div class="test"&amp;gt;&amp;lt;/div&amp;gt;
+&amp;lt;/template&amp;gt;
+
+&amp;lt;script&amp;gt;
+/**
+ * Return a component to be used as dummy in order
+ * to mock things like mixins.
+ */
+export default {
+  name: "MockComponent"
+};
+&amp;lt;/script&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Once we have a component, we can easily use it to use our mixins and use it accordingly.&lt;/p&gt;
+
+&lt;h2 id="using-mock-component-with-mixin"&gt;Using mock component with Mixin&lt;/h2&gt;
+
+&lt;p&gt;Let's say we have a mixin with a function &lt;code&gt;getBoolFromValue()&lt;/code&gt;, we can easily write a jest test for that now:&lt;/p&gt;
+
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nx"&gt;describe&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Test mixin function&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="kr"&gt;const&lt;/span&gt; &lt;span class="nx"&gt;wrapper&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;shallowMount&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;MockComponent&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nx"&gt;mixins&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;mixinName&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+  &lt;span class="p"&gt;});&lt;/span&gt;
+
+  &lt;span class="nx"&gt;it&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;should return proper value from bool&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nx"&gt;expect&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;getBoolFromValue&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;on&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)).&lt;/span&gt;&lt;span class="nx"&gt;toBeTruthy&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+  &lt;span class="p"&gt;})&lt;/span&gt;
+&lt;span class="p"&gt;})&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h2 id="why-not-use-a-component-from-the-code"&gt;Why not use a component from the code?&lt;/h2&gt;
+
+&lt;p&gt;Well, using a component already defined in the code would work too. However, why add all the bulk while testing a mixin. We want the mixin to be tested as easily as possible. As well, adding a component might add some bulky imports etc, so it is way easier to just keep a &lt;code&gt;MockComponent&lt;/code&gt; that is just basically an empty template to test Mixins.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href="https://github.com/deepjyoti30/ytmdl-web-v2/blob/master/tests/__tests__/mixins.settings.test.js"&gt;You can check the tests on my repo as well&lt;/a&gt;&lt;/p&gt;
+</description>
+      <guid isPermaLink="false">https://blog.deepjyoti30.dev/mixins-test-jest</guid>
+      <category>javascript</category>
+      <category>test</category>
+      <category>vuejs</category>
+      <category>jest</category>
+      <pubDate>Fri, 14 May 2021 15:20:18 +0000</pubDate>
+    </item>
     <item>
       <title>Deploy Celery &amp; RabbitMQ with Compose</title>
       <link>https://blog.deepjyoti30.dev/celery_compose</link>
@@ -190,7 +264,7 @@
       <category>rabbitmq</category>
       <category>docker</category>
       <category>compose</category>
-      <pubDate>Wed, 07 Apr 2021 13:34:47 +0000</pubDate>
+      <pubDate>Wed, 07 Apr 2021 19:04:47 +0000</pubDate>
     </item>
     <item>
       <title>Ytmdl Web Will Now Have Ads</title>
@@ -226,7 +300,7 @@
       <category>web</category>
       <category>ads</category>
       <category>python</category>
-      <pubDate>Thu, 01 Apr 2021 06:51:15 +0000</pubDate>
+      <pubDate>Thu, 01 Apr 2021 12:21:15 +0000</pubDate>
     </item>
     <item>
       <title>Automate Tests With GitHub Actions for Python</title>
@@ -340,7 +414,7 @@
       <category>python</category>
       <category>github</category>
       <category>devops</category>
-      <pubDate>Fri, 26 Mar 2021 06:11:04 +0000</pubDate>
+      <pubDate>Fri, 26 Mar 2021 11:41:04 +0000</pubDate>
     </item>
     <item>
       <title>I rebuilt my blog with Nuxt, now it loads in seconds</title>
@@ -413,7 +487,7 @@
       <category>blog</category>
       <category>design</category>
       <category>performance</category>
-      <pubDate>Sat, 20 Mar 2021 16:40:54 +0000</pubDate>
+      <pubDate>Sat, 20 Mar 2021 22:10:54 +0000</pubDate>
     </item>
     <item>
       <title>Ytmdl Web v2 is finally here. Here's what has changed!</title>
@@ -508,7 +582,7 @@
       <category>webapp</category>
       <category>vue</category>
       <category>python</category>
-      <pubDate>Thu, 25 Feb 2021 16:35:46 +0000</pubDate>
+      <pubDate>Thu, 25 Feb 2021 22:05:46 +0000</pubDate>
     </item>
     <item>
       <title>Cache dynamic pages for better performance</title>
@@ -556,7 +630,7 @@
       <category>dynamic</category>
       <category>pages</category>
       <category>improve</category>
-      <pubDate>Fri, 08 Jan 2021 13:17:49 +0000</pubDate>
+      <pubDate>Fri, 08 Jan 2021 18:47:49 +0000</pubDate>
     </item>
     <item>
       <title>Python has a built in search function. Here's how to use it</title>
@@ -698,7 +772,7 @@
       <category>search</category>
       <category>function</category>
       <category>builtin</category>
-      <pubDate>Mon, 04 Jan 2021 14:46:05 +0000</pubDate>
+      <pubDate>Mon, 04 Jan 2021 20:16:05 +0000</pubDate>
     </item>
     <item>
       <title>Get all tables used in join from SQLAlchemy</title>
@@ -804,7 +878,7 @@
       <category>tables</category>
       <category>sqlalchemy</category>
       <category>python</category>
-      <pubDate>Sat, 19 Dec 2020 13:27:10 +0000</pubDate>
+      <pubDate>Sat, 19 Dec 2020 18:57:10 +0000</pubDate>
     </item>
     <item>
       <title>Happiness status of your GitHub repo: repostatus</title>
@@ -816,7 +890,7 @@
       <category>javascript</category>
       <category>python</category>
       <category>opensource</category>
-      <pubDate>Wed, 09 Dec 2020 14:21:23 +0000</pubDate>
+      <pubDate>Wed, 09 Dec 2020 19:51:23 +0000</pubDate>
     </item>
     <item>
       <title>Add tab autocomplete for your commandline apps</title>
@@ -998,7 +1072,7 @@ autoload -U __ytmdl  &lt;span class="c1"&gt;# Here the function name is __ytmdl,
       <category>autocomplete</category>
       <category>commandline</category>
       <category>cli</category>
-      <pubDate>Fri, 20 Nov 2020 14:08:47 +0000</pubDate>
+      <pubDate>Fri, 20 Nov 2020 19:38:47 +0000</pubDate>
     </item>
     <item>
       <title>I created my own blog management system. Here's how I did it.</title>
@@ -1135,7 +1209,7 @@ autoload -U __ytmdl  &lt;span class="c1"&gt;# Here the function name is __ytmdl,
       <category>javascript</category>
       <category>python</category>
       <category>css</category>
-      <pubDate>Tue, 17 Nov 2020 16:22:55 +0000</pubDate>
+      <pubDate>Tue, 17 Nov 2020 21:52:55 +0000</pubDate>
     </item>
     <item>
       <title>Letting bots crawl your dynamically rendered page</title>
@@ -1308,7 +1382,7 @@ autoload -U __ytmdl  &lt;span class="c1"&gt;# Here the function name is __ytmdl,
       <category>dynamic</category>
       <category>rendered</category>
       <category>page</category>
-      <pubDate>Fri, 13 Nov 2020 12:17:45 +0000</pubDate>
+      <pubDate>Fri, 13 Nov 2020 17:47:45 +0000</pubDate>
     </item>
     <item>
       <title>Getting started with using MongoDB with free Heroku account</title>
@@ -1370,7 +1444,7 @@ autoload -U __ytmdl  &lt;span class="c1"&gt;# Here the function name is __ytmdl,
       <category>database</category>
       <category>mongodb</category>
       <category>mlab</category>
-      <pubDate>Mon, 11 May 2020 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 11 May 2020 05:30:00 +0000</pubDate>
     </item>
     <item>
       <title>Using Spotify with ncmpcpp and Mopidy in Linux</title>
@@ -1476,7 +1550,7 @@ autoload -U __ytmdl  &lt;span class="c1"&gt;# Here the function name is __ytmdl,
       <category>commandline</category>
       <category>spotify</category>
       <category>cli</category>
-      <pubDate>Thu, 16 Apr 2020 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 16 Apr 2020 05:30:00 +0000</pubDate>
     </item>
     <item>
       <title>Getting started with web scraping in Python</title>
@@ -1656,7 +1730,7 @@ This will return a list containing all the matches of the above pattern.&lt;/p&g
       <category>web</category>
       <category>page</category>
       <category>scraping</category>
-      <pubDate>Sat, 28 Mar 2020 00:00:00 +0000</pubDate>
+      <pubDate>Sat, 28 Mar 2020 05:30:00 +0000</pubDate>
     </item>
     <item>
       <title>Using Heroku as a server for your static page</title>
@@ -1719,7 +1793,7 @@ So a server lets us communicate with it and it and let's us make our page dynami
       <category>s3</category>
       <category>aws</category>
       <category>server</category>
-      <pubDate>Thu, 26 Mar 2020 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 26 Mar 2020 05:30:00 +0000</pubDate>
     </item>
     <item>
       <title>Owning a Mechanical Keyboard for the first time</title>
@@ -1772,7 +1846,7 @@ TKL just stands for Ten Key Less which means it has ten keys less than the usual
       <category>keyboard</category>
       <category>personal</category>
       <category>akko</category>
-      <pubDate>Thu, 19 Mar 2020 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 19 Mar 2020 05:30:00 +0000</pubDate>
     </item>
     <item>
       <title>4 lesser known free comment hosting services better than Disqus</title>
@@ -1896,7 +1970,7 @@ TKL just stands for Ten Key Less which means it has ten keys less than the usual
       <category>hosting</category>
       <category>disqus</category>
       <category>hosting</category>
-      <pubDate>Thu, 06 Feb 2020 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 06 Feb 2020 05:30:00 +0000</pubDate>
     </item>
     <item>
       <title>Things to do before redesigning your personal page</title>
@@ -1966,7 +2040,7 @@ TKL just stands for Ten Key Less which means it has ten keys less than the usual
       <category>page</category>
       <category>redesign</category>
       <category>github</category>
-      <pubDate>Tue, 31 Dec 2019 00:00:00 +0000</pubDate>
+      <pubDate>Tue, 31 Dec 2019 05:30:00 +0000</pubDate>
     </item>
     <item>
       <title>Write a responsive progressbar for the commandline using Python</title>
@@ -2035,7 +2109,7 @@ TKL just stands for Ten Key Less which means it has ten keys less than the usual
       <category>cli</category>
       <category>commandline</category>
       <category>responsive</category>
-      <pubDate>Sun, 17 Nov 2019 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 17 Nov 2019 05:30:00 +0000</pubDate>
     </item>
     <item>
       <title>How I wrote a Telegram bot for Bitbucket using Heroku and Python</title>
@@ -2090,7 +2164,7 @@ TKL just stands for Ten Key Less which means it has ten keys less than the usual
       <category>bot</category>
       <category>bitbucket</category>
       <category>open</category>
-      <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 24 Oct 2019 05:30:00 +0000</pubDate>
     </item>
     <item>
       <title>Have your own page for free</title>
@@ -2154,7 +2228,7 @@ TKL just stands for Ten Key Less which means it has ten keys less than the usual
       <category>static</category>
       <category>page</category>
       <category>personal</category>
-      <pubDate>Wed, 16 Oct 2019 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 16 Oct 2019 05:30:00 +0000</pubDate>
     </item>
     <item>
       <title>About me</title>
@@ -2182,7 +2256,7 @@ TKL just stands for Ten Key Less which means it has ten keys less than the usual
       <category>me</category>
       <category>personal</category>
       <category>deepjyoti30</category>
-      <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
+      <pubDate>Sat, 12 Oct 2019 05:30:00 +0000</pubDate>
     </item>
     <item>
       <title>Github and people who steal</title>
@@ -2214,7 +2288,7 @@ TKL just stands for Ten Key Less which means it has ten keys less than the usual
       <category>steal</category>
       <category>copyright</category>
       <category>playx</category>
-      <pubDate>Sat, 10 Aug 2019 00:00:00 +0000</pubDate>
+      <pubDate>Sat, 10 Aug 2019 05:30:00 +0000</pubDate>
     </item>
   </channel>
 </rss>
